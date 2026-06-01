@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { Shield, ShieldCheck, QrCode, Star, Award, Users, Clock, CheckCircle, XCircle, AlertCircle, ExternalLink, Copy, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 
 function TrustGrade({ grade, score, label, color }: { grade: string; score: number; label: string; color: string }) {
@@ -40,11 +40,35 @@ function UnverifiedBadge({ label }: { label: string }) {
 export default function PassportPage() {
   const qc = useQueryClient()
   const [copied, setCopied] = useState(false)
+  const passportCardRef = useRef<HTMLDivElement>(null)
 
   const { data: passport, isLoading } = useQuery({
     queryKey: ['my-passport'],
     queryFn: () => api.get('/passport/me').then(r => r.data),
   })
+
+  async function downloadPDF() {
+    if (!passportCardRef.current) return
+    const { default: html2canvas } = await import('html2canvas')
+    const { default: jsPDF } = await import('jspdf')
+
+    const canvas = await html2canvas(passportCardRef.current, {
+      scale: 2,
+      backgroundColor: null,
+      useCORS: true,
+      allowTaint: true,
+    })
+
+    const imgData = canvas.toDataURL('image/png')
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+
+    const pageWidth  = pdf.internal.pageSize.getWidth()
+    const imgWidth   = pageWidth - 20
+    const imgHeight  = (canvas.height * imgWidth) / canvas.width
+
+    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight)
+    pdf.save(`TrustPassport-${passport?.passport?.passportCode ?? 'TGP'}.pdf`)
+  }
 
   function copyPassportUrl() {
     const url = passport?.passport?.verifyUrl ?? ''
@@ -94,6 +118,10 @@ export default function PassportPage() {
               {copied ? 'Copied!' : 'Copy Link'}
             </button>
           )}
+          <button onClick={downloadPDF}
+            className="flex items-center gap-1.5 border border-gray-200 rounded-xl px-4 py-2 text-sm font-semibold text-gray-600 hover:border-indigo-300 transition-colors">
+            <Download className="w-4 h-4" /> Download PDF
+          </button>
           {verifyUrl && (
             <a href={verifyUrl} target="_blank" rel="noreferrer"
               className="flex items-center gap-1.5 text-white px-4 py-2 rounded-xl text-sm font-bold"
@@ -105,7 +133,7 @@ export default function PassportPage() {
       </div>
 
       {/* Main passport card */}
-      <div className="bg-gradient-to-br from-indigo-950 via-indigo-900 to-cyan-900 rounded-3xl p-8 text-white mb-6 relative overflow-hidden">
+      <div ref={passportCardRef} className="bg-gradient-to-br from-indigo-950 via-indigo-900 to-cyan-900 rounded-3xl p-8 text-white mb-6 relative overflow-hidden">
         {/* Subtle background pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-4 right-4 w-64 h-64 rounded-full border-2 border-white" />

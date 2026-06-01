@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException, ConflictException, Logger } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
 import { TrustScoreService } from '../trust-score/trust-score.service'
 import { EncryptionService } from '../../common/encryption/encryption.service'
+import { ZeptomailService } from '../../common/email/zeptomail.service'
 
 // ─── Step DTOs ────────────────────────────────────────────────────────────────
 
@@ -74,10 +75,13 @@ export interface ReviewApplicationDto {
 
 @Injectable()
 export class OnboardingService {
+  private readonly logger = new Logger(OnboardingService.name)
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly trustScoreService: TrustScoreService,
     private readonly encryption: EncryptionService,
+    private readonly email: ZeptomailService,
   ) {}
 
   // ── Individual Worker Flow ──────────────────────────────────────────────────
@@ -277,6 +281,8 @@ export class OnboardingService {
   // ── Review (Institution Admin / Super Admin) ────────────────────────────────
 
   async listApplications(institutionId: string, type?: string, status?: string, page = 1, limit = 20) {
+    const safePage = Number.isFinite(page) && page > 0 ? page : 1
+    const safeLimit = Number.isFinite(limit) && limit > 0 ? limit : 20
     const where: any = { institutionId }
     if (type) where.type = type
     if (status) where.status = status
@@ -285,13 +291,13 @@ export class OnboardingService {
       this.prisma.onboardingApplication.findMany({
         where,
         orderBy: { updatedAt: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit,
+        skip: (safePage - 1) * safeLimit,
+        take: safeLimit,
       }),
       this.prisma.onboardingApplication.count({ where }),
     ])
 
-    return { data: apps, pagination: { total, page, limit, totalPages: Math.ceil(total / limit) } }
+    return { data: apps, pagination: { total, page: safePage, limit: safeLimit, totalPages: Math.ceil(total / safeLimit) } }
   }
 
   async getApplication(applicationId: string, institutionId: string) {
@@ -372,6 +378,19 @@ export class OnboardingService {
       institutionId,
       createdBy: activatedBy,
     })
+
+    // Send welcome email
+    if (app.email) {
+      const institution = await this.prisma.institution.findUnique({
+        where: { id: institutionId },
+        select: { name: true },
+      })
+      this.email.sendWelcome({
+        to: app.email,
+        firstName: app.firstName,
+        communityName: institution?.name ?? 'TrustGrid',
+      }).catch(err => this.logger.warn({ err }, 'welcome_email_failed'))
+    }
 
     return { status: 'ACTIVE', workerId: worker.id, message: `${app.firstName} ${app.lastName} is now active in your workforce registry.` }
   }

@@ -20,6 +20,8 @@ async function bootstrap() {
   app.enableCors({
     origin: process.env.CORS_ORIGINS?.split(',') ?? [
       'http://localhost:3001',
+      'http://localhost:3002',
+      'http://localhost:3003',
       'https://trustgrid.ng',
       'https://app.trustgrid.ng',
       'https://admin.trustgrid.ng',

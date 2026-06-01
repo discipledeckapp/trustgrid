@@ -12,6 +12,7 @@ dependencies:
 
   # Navigation
   go_router: ^12.0.0
+  app_links: ^6.0.0
 
   # State management
   flutter_riverpod: ^2.4.0

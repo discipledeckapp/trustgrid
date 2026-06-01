@@ -35,9 +35,10 @@ api.interceptors.response.use(
 )
 
 export function saveAuth(tokens: { accessToken: string; refreshToken: string }, institutionId: string) {
-  Cookies.set('access_token',  tokens.accessToken,  { expires: 1 / 96, secure: true, sameSite: 'strict' })
-  Cookies.set('refresh_token', tokens.refreshToken, { expires: 7,      secure: true, sameSite: 'strict' })
-  Cookies.set('institution_id', institutionId,      { expires: 7,      secure: true, sameSite: 'strict' })
+  const secure = window.location.protocol === 'https:'
+  Cookies.set('access_token',  tokens.accessToken,  { expires: 1 / 96, secure, sameSite: 'strict' })
+  Cookies.set('refresh_token', tokens.refreshToken, { expires: 7,      secure, sameSite: 'strict' })
+  Cookies.set('institution_id', institutionId,      { expires: 7,      secure, sameSite: 'strict' })
 }
 
 export function clearAuth() {

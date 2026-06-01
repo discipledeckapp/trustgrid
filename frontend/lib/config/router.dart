@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../features/community/community_select_screen.dart';
 import '../features/community/community_provider.dart';
+import '../features/community/join_redirect_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
@@ -38,6 +39,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/community',
         builder: (context, state) => const CommunitySelectScreen(),
+      ),
+
+      // Deep link join routes
+      GoRoute(
+        path: '/join/:slug',
+        builder: (context, state) => JoinRedirectScreen(
+          slug: state.pathParameters['slug'] ?? '',
+        ),
+      ),
+      GoRoute(
+        path: '/join',
+        builder: (context, state) => const JoinRedirectScreen(slug: ''),
       ),
 
       // Auth

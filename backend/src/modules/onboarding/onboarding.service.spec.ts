@@ -16,7 +16,7 @@ describe('OnboardingService', () => {
       encrypt: jest.fn().mockReturnValue('encrypted-id'),
       hashIdNumber: jest.fn().mockReturnValue('hashed-id'),
     }
-    const service = new OnboardingService(prisma as any, {} as any, encryption as any)
+    const service = new OnboardingService(prisma as any, {} as any, encryption as any, {} as any)
 
     await service.saveWorkerVerification(
       { applicationId: 'app-1', idType: 'NIN', idNumber: '12345678901' },

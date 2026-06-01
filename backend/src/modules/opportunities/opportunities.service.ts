@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
+import { ZeptomailService } from '../../common/email/zeptomail.service'
 
 @Injectable()
 export class OpportunitiesService {
   private readonly logger = new Logger(OpportunitiesService.name)
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly email: ZeptomailService,
+  ) {}
 
   // ── Create ─────────────────────────────────────────────────────────────────
 
@@ -64,10 +68,47 @@ export class OpportunitiesService {
     const opp = await this.prisma.opportunity.findUnique({ where: { id } })
     if (!opp || opp.institutionId !== institutionId) throw new NotFoundException('Opportunity not found')
     if (opp.status !== 'DRAFT') throw new BadRequestException('Only draft opportunities can be published')
-    return this.prisma.opportunity.update({
+    const updated = await this.prisma.opportunity.update({
       where: { id },
       data: { status: 'OPEN', publishedAt: new Date() },
     })
+
+    // Alert workers who qualify for this opportunity (fire and forget)
+    this.notifyEligibleWorkers(id, institutionId).catch(() => {})
+
+    return updated
+  }
+
+  private async notifyEligibleWorkers(opportunityId: string, institutionId: string) {
+    const opp = await this.prisma.opportunity.findUnique({
+      where: { id: opportunityId },
+      select: { title: true, minimumTrustScore: true },
+    })
+    if (!opp) return
+
+    // Find workers who meet minimum trust score and have email
+    const minScore = opp.minimumTrustScore ?? 0
+    const workers = await this.prisma.workerProfile.findMany({
+      where: {
+        institutionId,
+        trustScore: { gte: minScore },
+        isAvailable: true,
+      },
+      include: { user: { select: { email: true, firstName: true } } },
+      take: 100,
+    })
+
+    for (const w of workers) {
+      if (w.user.email) {
+        await this.email.sendOpportunityAlert({
+          to: w.user.email,
+          firstName: w.user.firstName,
+          opportunityTitle: opp.title,
+          communityName: 'TrustGrid',
+          opportunityId,
+        }).catch(() => {})
+      }
+    }
   }
 
   async close(id: string, institutionId: string) {

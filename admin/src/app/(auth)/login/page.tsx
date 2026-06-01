@@ -16,10 +16,9 @@ export default function AdminLoginPage() {
     setLoading(true)
     setError('')
     try {
-      // For demo: use same credentials. In prod, PLATFORM_ADMIN would have separate auth.
-      const { data } = await api.post('/auth/login', { phone, password }, {
-        headers: { 'X-Institution-ID': 'platform' },
-      })
+      // For demo: use the seeded institution admin. In prod, PLATFORM_ADMIN
+      // would have a separate account and platform-aware authentication.
+      const { data } = await api.post('/auth/login', { identifier: phone, password })
       saveAdminAuth(data.tokens.accessToken)
       router.push('/dashboard')
     } catch {

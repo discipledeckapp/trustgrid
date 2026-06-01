@@ -11,6 +11,7 @@ import { AmazonRekognitionAdapter } from '../../common/adapters/amazon-rekogniti
 import { PremblyCACAdapter } from '../../common/adapters/prembly-cac.adapter'
 import { EncryptionService } from '../../common/encryption/encryption.service'
 import { VerificationLevel } from '../../common/adapters/identity-provider.adapter'
+import { ZeptomailService } from '../../common/email/zeptomail.service'
 
 export interface InitiateVerificationDto {
   idType: string
@@ -37,6 +38,7 @@ export class IdentityService {
     private readonly rekognition: AmazonRekognitionAdapter,
     private readonly cacAdapter: PremblyCACAdapter,
     private readonly encryption: EncryptionService,
+    private readonly email: ZeptomailService,
   ) {}
 
   // ── Liveness ──────────────────────────────────────────────────────────────
@@ -283,6 +285,29 @@ export class IdentityService {
         referenceType: 'identity_verification', referenceId: verificationId,
         metadata: { level: result.verificationLevel, pathway, livenessConfidence: params.livenessConfidence },
       })
+
+      // Send verification complete email
+      const user = await this.prisma.userAccount.findUnique({
+        where: { id: workerRecord.userId },
+        select: { email: true, firstName: true, institutionId: true },
+      })
+      const institution = await this.prisma.institution.findUnique({
+        where: { id: params.institutionId },
+        select: { name: true },
+      })
+      if (user?.email) {
+        const trustData = await this.prisma.workerProfile.findUnique({
+          where: { id: params.workerId },
+          select: { trustScore: true },
+        })
+        this.email.sendVerificationComplete({
+          to: user.email,
+          firstName: user.firstName,
+          communityName: institution?.name ?? 'TrustGrid',
+          trustGrade: 'B',
+          trustScore: Math.round(trustData?.trustScore ?? 50),
+        }).catch(() => {})
+      }
     }
 
     this.logger.log({
