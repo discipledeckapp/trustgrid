@@ -34,9 +34,9 @@ export class AuthController {
   @ApiHeader({ name: 'X-Institution-ID', description: 'Institution ID', required: true })
   async login(
     @Body() dto: LoginDto,
-    @Headers('x-institution-id') institutionId: string,
+    @Headers('x-institution-id') institutionId?: string,
   ) {
-    return this.authService.login(dto, institutionId);
+    return this.authService.login(dto, institutionId || undefined);
   }
 
   @Post('refresh')

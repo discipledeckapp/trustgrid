@@ -71,17 +71,23 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginDto, institutionId: string) {
+  async login(dto: LoginDto, institutionId?: string) {
     const identifier = dto.identifier.trim()
-
-    // Determine if identifier is email or phone
     const isEmail = identifier.includes('@')
 
-    const user = await this.prisma.userAccount.findFirst({
-      where: isEmail
-        ? { email: identifier.toLowerCase(), institutionId }
-        : { phone: identifier, institutionId },
-    });
+    // Build where clause — institutionId is optional.
+    // If provided (e.g. from X-Institution-ID header or community middleware),
+    // scope the lookup. Otherwise search globally — useful on first login
+    // before the client has stored an institutionId.
+    const identifierClause = isEmail
+      ? { email: identifier.toLowerCase() }
+      : { phone: identifier }
+
+    const where = institutionId
+      ? { ...identifierClause, institutionId }
+      : identifierClause
+
+    const user = await this.prisma.userAccount.findFirst({ where });
 
     if (!user || !user.passwordHash) {
       throw new UnauthorizedException('Invalid credentials');
