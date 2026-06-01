@@ -87,11 +87,11 @@ Communities publish trust-gated opportunities — jobs, volunteer roles, event s
 TGP-92A81
 
 Chukwuemeka Adeyemi
-El-Shaddai Parish, RCCG Area 5
+El-Shaddai Parish, Redemption City Area 5
 
 ✓ NIN Verified (NIMC)
 ✓ Active Parish Member
-✓ RCCG Convention Volunteer
+✓ Redemption City Convention Volunteer
 ✓ Certified Electrician (COREN)
 
 ★ Area 5 Endorsement

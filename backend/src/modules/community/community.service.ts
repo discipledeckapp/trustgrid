@@ -274,17 +274,17 @@ export class CommunityService {
     })
   }
 
-  // ── Seed default RCCG hierarchy types for RCCG institutions ───────────────
+  // ── Seed Redemption City hierarchy types (7-level church hierarchy) ──────────
 
   async seedRCCGNodeTypes(institutionId: string, createdBy: string) {
     const types = [
-      { name: 'Global', pluralName: 'Global',         level: 1, icon: 'globe',    color: '#4F46E5' },
-      { name: 'Continent', pluralName: 'Continents',  level: 2, icon: 'map',      color: '#0D9488' },
-      { name: 'Region', pluralName: 'Regions',        level: 3, icon: 'layers',   color: '#059669' },
-      { name: 'Province', pluralName: 'Provinces',    level: 4, icon: 'building', color: '#D97706' },
-      { name: 'Zone', pluralName: 'Zones',            level: 5, icon: 'grid',     color: '#7C3AED' },
-      { name: 'Area', pluralName: 'Areas',            level: 6, icon: 'map-pin',  color: '#DC2626' },
-      { name: 'Parish', pluralName: 'Parishes',       level: 7, icon: 'church',   color: '#1D4ED8' },
+      { name: 'Global',    pluralName: 'Global',      level: 1, icon: 'globe',    color: '#7C0000' },
+      { name: 'Continent', pluralName: 'Continents',  level: 2, icon: 'map',      color: '#9B1C1C' },
+      { name: 'Region',    pluralName: 'Regions',     level: 3, icon: 'layers',   color: '#B91C1C' },
+      { name: 'Province',  pluralName: 'Provinces',   level: 4, icon: 'building', color: '#C9A84C' },
+      { name: 'Zone',      pluralName: 'Zones',       level: 5, icon: 'grid',     color: '#D97706' },
+      { name: 'Area',      pluralName: 'Areas',       level: 6, icon: 'map-pin',  color: '#92400E' },
+      { name: 'Parish',    pluralName: 'Parishes',    level: 7, icon: 'church',   color: '#7C0000' },
     ]
 
     const created = []
@@ -299,7 +299,7 @@ export class CommunityService {
         created.push(type)
       }
     }
-    return { seeded: created.length, message: `Seeded ${created.length} RCCG hierarchy levels` }
+    return { seeded: created.length, message: `Seeded ${created.length} Redemption City hierarchy levels` }
   }
 
   async seedEstateNodeTypes(institutionId: string) {

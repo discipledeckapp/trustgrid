@@ -1,6 +1,6 @@
 /**
  * TrustGrid Demo Seed
- * Populates the RCCG Convention Operations scenario for the hackathon demo
+ * Populates the Redemption City Convention Operations scenario for the hackathon demo
  */
 
 import { PrismaClient, WorkerType, InstitutionType } from '@prisma/client'
@@ -238,16 +238,26 @@ async function seed() {
 
   console.log('✓ Cleaned up existing data');
 
-  // Create Institution: RCCG Convention Operations
+  // Create Institution: Redemption City Convention Operations
   const institution = await prisma.institution.create({
     data: {
-      name: 'RCCG Convention Operations',
-      slug: 'rccg-convention-ops',
+      name: 'Redemption City',
+      slug: 'redemption-city',
       type: InstitutionType.CONVENTION_ORGANIZER,
-      email: 'ops@rccg.org',
+      email: 'ops@redemptioncity.ng',
       phone: '+2348001234567',
       city: 'Redemption Camp',
       state: 'Ogun',
+      subdomain: 'redemption-city',
+      subdomainEnabled: true,
+      brandConfig: {
+        displayName: 'Redemption City Trust Network',
+        tagline: 'Verified People. Trusted Community.',
+        primaryColor: '#7C0000',
+        accentColor: '#C9A84C',
+        appName: 'Redemption City',
+        poweredByVisible: true,
+      },
       country: 'NG',
       isVerified: true,
       config: {
@@ -288,7 +298,7 @@ async function seed() {
       firstName: 'Deacon',
       lastName: 'Emeka',
       phone: '08001234567',
-      email: 'emeka@rccg.org',
+      email: 'emeka@redemptioncity.ng',
       role: 'INSTITUTION_ADMIN',
       passwordHash,
       phoneVerified: true,
@@ -301,7 +311,7 @@ async function seed() {
       firstName: 'Sister',
       lastName: 'Adaeze',
       phone: '08001234568',
-      email: 'adaeze@rccg.org',
+      email: 'adaeze@redemptioncity.ng',
       role: 'INSTITUTION_OPERATOR',
       passwordHash,
     },
@@ -468,7 +478,7 @@ async function seed() {
       requesterId: adminUser.id,
       title: 'Convention Electricians — May 2026',
       description:
-        'Need 50 verified electricians for the 3-day RCCG National Convention. Workers must be fully verified with trust score ≥65. Roles: stage power, generator maintenance, lighting systems, emergency response.',
+        'Need 50 verified electricians for the 3-day Redemption City National Convention. Workers must be fully verified with trust score ≥65. Roles: stage power, generator maintenance, lighting systems, emergency response.',
       categoryId: 'cat_electrical',
       requiredSkills: ['Electrician'],
       workersNeeded: 50,
@@ -479,7 +489,7 @@ async function seed() {
       locationAddress: 'Redemption Camp, Km 46, Lagos-Ibadan Expressway, Ogun State',
       priority: 'HIGH',
       status: 'SUBMITTED',
-      notes: 'Annual convention — critical event. Supervisor: Deacon Emeka (08001234567)',
+      notes: 'Annual convention — critical event. Supervisor: Deacon Emeka Redemption City Ops (08001234567)',
     },
   });
 
@@ -634,8 +644,8 @@ async function seed() {
   console.log(`   Institution: ${institution.name}`);
   console.log('');
   console.log('👥 ALL USER TYPE CREDENTIALS (password: Admin123! for all):');
-  console.log('   INSTITUTION_ADMIN:    08001234567  (Deacon Emeka — full access)');
-  console.log('   INSTITUTION_OPERATOR: 08001234568  (Sister Adaeze — day-to-day ops)');
+  console.log('   INSTITUTION_ADMIN:    08001234567  (Deacon Emeka — Redemption City, full access)');
+  console.log('   INSTITUTION_OPERATOR: 08001234568  (Sister Adaeze — Redemption City, day-to-day ops)');
   console.log('   WORKER (artisan):     08001234570  (Chukwuemeka — electrician, A+ grade)');
   console.log('   WORKER (professional):08001234572  (Ngozi — corporate lawyer)');
   console.log('   ORGANISATION_ADMIN:   08001234573  (Emeka Obi — Emeka Electrical Ltd)');

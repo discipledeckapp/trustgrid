@@ -25,7 +25,7 @@ export class AuthorityController {
 
   @Post('roles/seed/rccg')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Seed standard RCCG authority roles' })
+  @ApiOperation({ summary: 'Seed standard Redemption City authority roles' })
   seedRCCGRoles(@CurrentUser() user: CurrentUserPayload) {
     return this.authorityService.seedRCCGRoles(user.institutionId)
   }

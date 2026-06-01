@@ -69,13 +69,13 @@ export class AuthorityService {
     })
   }
 
-  // ── Seed default RCCG authority roles ─────────────────────────────────────
+  // ── Seed Redemption City authority roles ──────────────────────────────────
 
   async seedRCCGRoles(institutionId: string) {
     const roles = [
       {
         name: 'Provincial Pastor',
-        description: 'Head of an RCCG Province. Highest local authority.',
+        description: 'Head of a Redemption City Province. Highest local authority.',
         level: 7,
         canEndorseMemberships: true, canIssueTrustCredentials: true,
         canVerifyChildNodes: true, canApproveApplications: true,
@@ -91,7 +91,7 @@ export class AuthorityService {
       },
       {
         name: 'Parish Pastor',
-        description: 'Head of a local Parish. Issues Parish-level endorsements.',
+        description: 'Head of a local Redemption City Parish. Issues Parish-level endorsements.',
         level: 5,
         canEndorseMemberships: true, canIssueTrustCredentials: true,
         canVerifyChildNodes: false, canApproveApplications: true,

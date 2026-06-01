@@ -27,7 +27,7 @@ export class CommunityController {
 
   @Post('node-types/seed/rccg')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Seed RCCG hierarchy node types (Global → Parish, 7 levels)' })
+  @ApiOperation({ summary: 'Seed Redemption City hierarchy node types (Global → Parish, 7 levels)' })
   seedRCCG(@CurrentUser() user: CurrentUserPayload) {
     return this.communityService.seedRCCGNodeTypes(user.institutionId, user.sub)
   }
