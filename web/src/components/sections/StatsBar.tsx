@@ -1,9 +1,9 @@
 const STATS = [
-  { value: '5M+',    label: 'RCCG Members',       sub: 'potential network' },
-  { value: '15,000', label: 'Parishes',            sub: 'across Nigeria' },
-  { value: '500+',   label: 'Managed Estates',     sub: 'Lagos metro' },
-  { value: '₦47M',   label: 'Year 1 ARR Target',   sub: 'conservative estimate' },
-  { value: '82%',    label: 'Gross Margin',        sub: 'SaaS infrastructure' },
+  { value: 'NIN + BVN',  label: 'Live Verification',      sub: 'via Prembly IdentityPass' },
+  { value: '7-Level',    label: 'Community Hierarchy',     sub: 'Global down to Parish' },
+  { value: '3',          label: 'Verification Pathways',   sub: 'Liveness · Upload · Agent' },
+  { value: 'TGP-',       label: 'Trust Passport Format',   sub: 'QR-scannable, publicly verifiable' },
+  { value: '∞',          label: 'Community Types',         sub: 'Church · Estate · School · City' },
 ]
 
 export default function StatsBar() {
