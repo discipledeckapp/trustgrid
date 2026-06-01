@@ -6,8 +6,8 @@ import { Providers } from './providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'TrustGrid — Governance Dashboard',
-  description: 'Workforce governance platform for institutions',
+  title: 'TrustGrid — Community Trust Infrastructure',
+  description: 'Trusted People. Trusted Communities. Trusted Opportunities.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

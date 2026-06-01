@@ -76,7 +76,7 @@ export function Sidebar() {
                 WebkitTextFillColor: 'transparent',
               }}>Grid</span>
             </p>
-            <p className="text-white/25 text-xs mt-0.5">Governance Platform</p>
+            <p className="text-white/25 text-xs mt-0.5">Trust Infrastructure</p>
           </div>
         </Link>
       </div>

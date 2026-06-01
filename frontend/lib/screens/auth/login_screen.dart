@@ -60,7 +60,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         }
       }
     } catch (e) {
-      setState(() { _error = 'Invalid credentials. Try: 08001234567 or user@example.com / Admin123!'; });
+      setState(() { _error = 'Invalid phone/email or password. Please try again.'; });
     } finally {
       if (mounted) setState(() { _loading = false; });
     }

@@ -70,7 +70,7 @@ export default function LoginPage() {
       saveAuth(data.tokens, data.user.institutionId)
       router.push('/dashboard')
     } catch {
-      setError('Invalid credentials. Demo: 08001234567 / Admin123!')
+      setError('Invalid phone/email or password.')
     } finally {
       setLoading(false)
     }
@@ -114,7 +114,7 @@ export default function LoginPage() {
               <NetworkGMarkWhite size={42} />
             </div>
             <h1 className="text-2xl font-bold text-white">{found ? communityName : 'TrustGrid'}</h1>
-            <p className="text-white/50 text-sm mt-1">Governance Dashboard</p>
+            <p className="text-white/50 text-sm mt-1">{found ? 'Community Trust Network' : 'Community Trust Infrastructure'}</p>
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
@@ -163,10 +163,12 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="mt-4 rounded-xl px-4 py-3 text-xs"
-              style={{ background: 'rgba(79,70,229,0.06)', color: '#4F46E5' }}>
-              <strong>Demo:</strong> 08001234567 or emeka@redemptioncity.ng / Admin123!
-            </div>
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4 rounded-xl px-4 py-3 text-xs"
+                style={{ background: 'rgba(79,70,229,0.06)', color: '#4F46E5' }}>
+                <strong>Dev only:</strong> 08001234567 or emeka@redemptioncity.ng / Admin123!
+              </div>
+            )}
           </div>
         </div>
       </div>

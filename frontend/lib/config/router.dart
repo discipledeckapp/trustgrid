@@ -174,7 +174,7 @@ class AdminShell extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Governance Dashboard',
+                  'Trust Infrastructure',
                   style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
                 ),
               ],
