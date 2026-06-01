@@ -98,4 +98,81 @@ class TrustGridTheme {
     ),
     fontFamily: 'Inter',
   );
+
+  static ThemeData communityTheme({
+    required Color primaryColor,
+    required Color accentColor,
+  }) =>
+      ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: primaryColor,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: primaryColor,
+          secondary: accentColor,
+          surface: TrustGridColors.surface,
+        ),
+        fontFamily: 'Inter',
+        appBarTheme: AppBarTheme(
+          backgroundColor: primaryColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: false,
+          titleTextStyle: const TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        cardTheme: CardThemeData(
+          color: TrustGridColors.card,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: TrustGridColors.border),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryColor,
+            foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(52),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            textStyle: const TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: TrustGridColors.border),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: TrustGridColors.border),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: primaryColor, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+        ),
+        chipTheme: ChipThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ),
+      );
 }

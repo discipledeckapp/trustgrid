@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { useInstitutionConfig, useUpdateConfig } from '@/hooks/useApi'
-import { Save, Settings, Sliders, Tag, Shield, Bell, RefreshCw } from 'lucide-react'
+import { Save, Settings, Sliders, Tag, Shield, Bell, RefreshCw, Palette, ChevronRight } from 'lucide-react'
 
 const DEFAULT_WEIGHTS = {
   account_created: 5,
@@ -95,6 +96,23 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 pb-16">
+      {/* Branding quick-access card */}
+      <Link
+        href="/settings/branding"
+        className="flex items-center gap-4 bg-gradient-to-r from-indigo-50 to-teal-50 border border-indigo-100 rounded-2xl p-4 mb-6 hover:border-indigo-300 transition-all group"
+      >
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-teal-500 flex items-center justify-center shrink-0">
+          <Palette className="w-5 h-5 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-gray-900 text-sm">Community Branding</p>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Customise your subdomain, colours and logo →
+          </p>
+        </div>
+        <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors shrink-0" />
+      </Link>
+
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-black text-gray-900">Settings</h1>

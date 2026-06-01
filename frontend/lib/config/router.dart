@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../features/community/community_select_screen.dart';
+import '../features/community/community_provider.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
@@ -20,7 +23,23 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/login',
     debugLogDiagnostics: false,
+    redirect: (context, state) async {
+      // Always allow the community select screen through
+      if (state.matchedLocation == '/community') return null;
+
+      final prefs = await SharedPreferences.getInstance();
+      final hasCommunity = prefs.containsKey('community_slug');
+      if (!hasCommunity) return '/community';
+
+      return null;
+    },
     routes: [
+      // Community onboarding
+      GoRoute(
+        path: '/community',
+        builder: (context, state) => const CommunitySelectScreen(),
+      ),
+
       // Auth
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(path: '/register', builder: (context, state) => const RegisterScreen()),
@@ -94,32 +113,34 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-class AdminShell extends StatelessWidget {
+class AdminShell extends ConsumerWidget {
   final Widget child;
   const AdminShell({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: Row(
         children: [
-          if (MediaQuery.of(context).size.width > 800) _buildSidebar(context),
+          if (MediaQuery.of(context).size.width > 800) _buildSidebar(context, ref),
           Expanded(child: child),
         ],
       ),
       bottomNavigationBar: MediaQuery.of(context).size.width <= 800
-          ? _buildBottomNav(context)
+          ? _buildBottomNav(context, ref)
           : null,
     );
   }
 
-  Widget _buildSidebar(BuildContext context) {
+  Widget _buildSidebar(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).matchedLocation;
+    final brand = ref.watch(effectiveBrandProvider);
+    final sidebarColor = brand.found ? brand.primaryColor : const Color(0xFF1E40AF);
     return Container(
       width: 240,
-      decoration: const BoxDecoration(
-        color: Color(0xFF1E40AF),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
+      decoration: BoxDecoration(
+        color: sidebarColor,
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,9 +151,9 @@ class AdminShell extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'TrustGrid',
-                  style: TextStyle(
+                Text(
+                  brand.displayName,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -189,11 +210,13 @@ class AdminShell extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNav(BuildContext context) {
+  Widget _buildBottomNav(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).matchedLocation;
+    final brand = ref.watch(effectiveBrandProvider);
+    final activeColor = brand.found ? brand.primaryColor : const Color(0xFF1E40AF);
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color(0xFF1E40AF),
+      selectedItemColor: activeColor,
       unselectedItemColor: Colors.grey,
       currentIndex: _getIndex(location),
       onTap: (i) {

@@ -1,20 +1,36 @@
-import { Controller, Get, Patch, Post, Body, UseGuards } from '@nestjs/common'
+import { Controller, Get, Patch, Post, Body, UseGuards, Query } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { InstitutionsService } from './institutions.service'
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard'
 import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator'
 import { Roles } from '../../common/decorators/roles.decorator'
 import { RolesGuard } from '../../common/guards/roles.guard'
+import { UpdateBrandDto } from './dto/update-brand.dto'
 
 @ApiTags('Institution')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('institution')
 
 export class InstitutionsController {
   constructor(private readonly institutionsService: InstitutionsService) {}
 
+  // Public — called by Next.js middleware and Flutter app to resolve brand config
+  @Get('brand')
+  @ApiOperation({ summary: 'Resolve institution brand config by subdomain or custom domain. Public endpoint.' })
+  getBrandByDomain(@Query('host') host: string) {
+    return this.institutionsService.getBrandByDomain(host)
+  }
+
+  @Patch('brand')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update institution brand config (subdomain, colors, logo, custom domain)' })
+  updateBrand(@Body() body: UpdateBrandDto, @CurrentUser() user: CurrentUserPayload) {
+    return this.institutionsService.updateBrand(user.institutionId, body)
+  }
+
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'INSTITUTION_VIEWER', 'ORGANISATION_ADMIN')
   @ApiOperation({ summary: 'Get current institution details' })
   async getMyInstitution(@CurrentUser() user: CurrentUserPayload) {
@@ -22,6 +38,8 @@ export class InstitutionsController {
   }
 
   @Patch()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles('INSTITUTION_ADMIN')
   @ApiOperation({ summary: 'Update institution details' })
   async updateInstitution(
@@ -32,6 +50,8 @@ export class InstitutionsController {
   }
 
   @Get('config')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'INSTITUTION_VIEWER')
   @ApiOperation({ summary: 'Get institution configuration' })
   async getConfig(@CurrentUser() user: CurrentUserPayload) {
@@ -39,6 +59,8 @@ export class InstitutionsController {
   }
 
   @Patch('config')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles('INSTITUTION_ADMIN')
   @ApiOperation({ summary: 'Update institution configuration' })
   async updateConfig(
@@ -49,6 +71,8 @@ export class InstitutionsController {
   }
 
   @Get('operators')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles('INSTITUTION_ADMIN')
   @ApiOperation({ summary: 'List institution operators and admins' })
   async listOperators(@CurrentUser() user: CurrentUserPayload) {
@@ -56,6 +80,8 @@ export class InstitutionsController {
   }
 
   @Post('operators')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles('INSTITUTION_ADMIN')
   @ApiOperation({ summary: 'Create an operator account' })
   async createOperator(

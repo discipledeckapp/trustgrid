@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { Shield, ShieldCheck, ShieldX, ShieldAlert, Star, Award, Users, CheckCircle, XCircle, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useBrand } from '@/hooks/useBrand'
 
 interface VerifyResult {
   valid: boolean
@@ -38,6 +39,7 @@ export default function PublicVerifyClient({ passportCode }: { passportCode: str
   const [result, setResult] = useState<VerifyResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { effective } = useBrand()
 
   useEffect(() => {
     const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'https://trustgrid-backend.onrender.com/api/v1'
@@ -47,9 +49,13 @@ export default function PublicVerifyClient({ passportCode }: { passportCode: str
       .catch(() => { setError('Could not reach verification server.'); setLoading(false) })
   }, [passportCode])
 
+  const bgStyle = {
+    background: `linear-gradient(135deg, ${effective.primaryColor ?? '#312e81'} 0%, ${effective.accentColor ?? '#134e4a'} 100%)`,
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 to-cyan-950">
+      <div className="min-h-screen flex items-center justify-center" style={bgStyle}>
         <div className="text-center">
           <div className="animate-spin w-12 h-12 border-2 border-white/30 border-t-white rounded-full mx-auto mb-4" />
           <p className="text-white/60 text-sm font-medium">Verifying trust passport…</p>
@@ -60,7 +66,7 @@ export default function PublicVerifyClient({ passportCode }: { passportCode: str
 
   if (error || !result?.valid) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 to-cyan-950 p-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={bgStyle}>
         <div className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-10 text-center max-w-md w-full">
           <ShieldX className="w-16 h-16 text-red-400 mx-auto mb-4" />
           <h1 className="text-2xl font-black text-white mb-2">Passport Not Found</h1>
@@ -75,7 +81,7 @@ export default function PublicVerifyClient({ passportCode }: { passportCode: str
 
   if (result.isPrivate) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-950 to-cyan-950 p-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={bgStyle}>
         <div className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-10 text-center max-w-md w-full">
           <ShieldAlert className="w-16 h-16 text-amber-400 mx-auto mb-4" />
           <h1 className="text-2xl font-black text-white mb-2">Passport is Private</h1>
@@ -92,15 +98,19 @@ export default function PublicVerifyClient({ passportCode }: { passportCode: str
   const gStyle  = GRADE_STYLES[grade] ?? GRADE_STYLES['F']
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-indigo-900 to-cyan-950 p-4 flex flex-col items-center justify-start py-12">
+    <div className="min-h-screen p-4 flex flex-col items-center justify-start py-12" style={bgStyle}>
       <div className="w-full max-w-md">
 
-        {/* Header — TrustGrid branding */}
+        {/* Header — community branding */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-400 to-cyan-400 flex items-center justify-center">
-            <Shield className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-white font-black text-xl tracking-tight">TrustGrid</span>
+          {effective.logoUrl ? (
+            <img src={effective.logoUrl} alt={effective.displayName ?? 'Logo'} className="h-8 w-auto object-contain" />
+          ) : (
+            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+              <Shield className="w-5 h-5 text-white" />
+            </div>
+          )}
+          <span className="text-white font-black text-xl tracking-tight">{effective.displayName ?? 'TrustGrid'}</span>
         </div>
 
         {/* Main verification card */}
@@ -207,14 +217,16 @@ export default function PublicVerifyClient({ passportCode }: { passportCode: str
         </div>
 
         {/* Footer */}
-        <div className="text-center">
-          <a href="https://trustgrid.ng" target="_blank" rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-white/50 hover:text-white/80 transition-colors text-xs font-medium">
-            <Shield className="w-3.5 h-3.5" />
-            Powered by TrustGrid · Community Trust Infrastructure
-            <ExternalLink className="w-3 h-3" />
-          </a>
-        </div>
+        {effective.poweredByVisible !== false && (
+          <div className="text-center">
+            <a href="https://trustgrid.ng" target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-white/50 hover:text-white/80 transition-colors text-xs font-medium">
+              <Shield className="w-3.5 h-3.5" />
+              Powered by TrustGrid · Community Trust Infrastructure
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -172,6 +172,11 @@ model Institution {
   websiteUrl  String?
   isActive    Boolean         @default(true)
   isVerified  Boolean         @default(false)
+  subdomain           String?   @unique  // "rccg" → rccg.trustgrid.ng
+  customDomain        String?   @unique  // "portal.rccg.org" (Enterprise)
+  brandConfig         Json      @default("{}")  // colors, logo, name, tagline
+  subdomainEnabled    Boolean   @default(false)
+  customDomainEnabled Boolean   @default(false)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
