@@ -89,25 +89,27 @@ export default function Hero() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
               <span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" />
-              Built for Nigerian Institutions
+              Community Trust Infrastructure
             </div>
 
             <h1 className="text-5xl lg:text-6xl font-black leading-[1.08] tracking-tight mb-6">
-              <span className="text-white">The Trust Layer</span>
+              <span className="text-white">Trusted People.</span>
               <br />
-              <span className="text-gradient">Communities Need</span>
+              <span className="text-white">Trusted Communities.</span>
+              <br />
+              <span className="text-gradient">Trusted Opportunities.</span>
             </h1>
 
             <p className="text-lg text-white/60 leading-relaxed mb-8 max-w-lg">
-              TrustGrid gives estates, churches, schools, and smart cities the infrastructure to verify, deploy, and govern trusted service workers — turning WhatsApp chaos into permanent institutional accountability.
+              TrustGrid is the trust graph that Nigerian communities run on. One verified identity, portable across every church, estate, school, and smart city you belong to.
             </p>
 
-            {/* Key facts — honest, product-based */}
+            {/* Key facts */}
             <div className="flex flex-wrap gap-4 mb-10">
               {[
-                { icon: '🔐', text: 'NIN/BVN verified workers' },
-                { icon: '⭐', text: 'Algorithmic trust scores' },
-                { icon: '🏛️', text: 'Built for institutions' },
+                { icon: '🛡️', text: 'Portable Trust Passport' },
+                { icon: '🏘️', text: 'Community hierarchy engine' },
+                { icon: '🔓', text: 'Trust-gated opportunities' },
               ].map(({ icon, text }) => (
                 <div key={text} className="flex items-center gap-2 text-sm text-white/50">
                   <span>{icon}</span>

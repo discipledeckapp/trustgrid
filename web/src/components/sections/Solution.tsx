@@ -24,11 +24,11 @@ export default function Solution() {
       <div className="max-w-5xl mx-auto text-center">
         <span className="text-teal-400 text-sm font-semibold uppercase tracking-widest">The Solution</span>
         <h2 className="text-4xl md:text-5xl font-black text-white mt-3 mb-4 leading-tight">
-          Not a marketplace.<br />
-          <span className="text-gradient">The operating system.</span>
+          Not just governance.<br />
+          <span className="text-gradient">The trust graph.</span>
         </h2>
         <p className="text-white/50 text-lg max-w-2xl mx-auto mb-16">
-          TrustGrid gives institutions permanent, searchable, algorithmic institutional memory about every worker and organisation they have ever engaged.
+          Every verified person gets a portable Trust Passport. Every community gets a hierarchy. Every opportunity gets a trust gate.
         </p>
 
         {/* Central illustration */}
@@ -51,28 +51,28 @@ export default function Solution() {
         <div className="grid md:grid-cols-3 gap-5">
           {[
             {
-              icon: '🔐',
-              title: 'Verify',
-              sub: 'Identity-first',
-              desc: 'NIN and BVN verification via Prembly. Face match. Credential upload. Every worker confirmed before deployment.',
+              icon: '🛡️',
+              title: 'Trust Passport',
+              sub: 'Portable verified identity',
+              desc: 'Every person gets a TGP-XXXXXXXX passport — verified identity, community memberships, authority roles, and trust score. Scannable by QR from anywhere.',
               color: 'from-emerald-500/10 to-teal-500/10',
               border: 'border-emerald-500/20',
               tag: 'text-emerald-400',
             },
             {
-              icon: '⭐',
-              title: 'Score',
-              sub: 'Algorithmic trust',
-              desc: 'Every deployment, rating, endorsement, and incident builds a permanent trust score. Configurable weights per institution.',
+              icon: '🏘️',
+              title: 'Community Network',
+              sub: 'Hierarchical trust propagation',
+              desc: 'Model any community — church, estate, university — as a verified node hierarchy. Trust flows from verified parent nodes down to parishes, blocks, and departments.',
               color: 'from-indigo-500/10 to-violet-500/10',
               border: 'border-indigo-500/20',
               tag: 'text-indigo-400',
             },
             {
-              icon: '🏛️',
-              title: 'Govern',
-              sub: 'Institutional memory',
-              desc: 'Service requests, workforce assignments, incident management, procurement. Everything your institution needs in one place.',
+              icon: '🔓',
+              title: 'Opportunity Network',
+              sub: 'Trust-gated access',
+              desc: 'Post opportunities with a trust gate. Only verified members who meet the score threshold and hold required credentials can apply. No more CV fraud.',
               color: 'from-amber-500/10 to-orange-500/10',
               border: 'border-amber-500/20',
               tag: 'text-amber-400',

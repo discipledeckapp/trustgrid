@@ -29,6 +29,7 @@ import { OnboardingModule } from './modules/onboarding/onboarding.module'
 import { CommunityModule } from './modules/community/community.module'
 import { AuthorityModule } from './modules/authority/authority.module'
 import { TrustPassportModule } from './modules/trust-passport/trust-passport.module'
+import { OpportunitiesModule } from './modules/opportunities/opportunities.module'
 import { pinoLoggerConfig } from './common/logger/logger.config'
 
 @Module({
@@ -77,6 +78,7 @@ import { pinoLoggerConfig } from './common/logger/logger.config'
     CommunityModule,
     AuthorityModule,
     TrustPassportModule,
+    OpportunitiesModule,
   ],
 })
 export class AppModule {}

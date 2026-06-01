@@ -25,6 +25,14 @@ export class IdentityController {
 
   // ── Protected ─────────────────────────────────────────────────────────────
 
+  @Get('verified-profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get the current user verified identity data' })
+  getVerifiedProfile(@CurrentUser() user: CurrentUserPayload) {
+    return this.identityService.getVerifiedProfile(user.sub, user.institutionId)
+  }
+
   @Post('liveness/create-session')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()

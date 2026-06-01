@@ -239,10 +239,43 @@ export class IdentityService {
       },
     })
 
-    await this.prisma.workerProfile.update({
+    const workerRecord = await this.prisma.workerProfile.update({
       where: { id: workerId },
       data: { verificationStatus: dbStatus as any },
+      select: { userId: true, profilePhotoEncrypted: true },
     })
+
+    // Propagate verified legal name to UserAccount when verification succeeds
+    if (result.success && encLegalName && workerRecord.userId) {
+      const decryptedName = this.encryption.decrypt(encLegalName)
+      if (decryptedName) {
+        const nameParts = decryptedName.trim().split(/\s+/)
+        const firstName = nameParts[0] ?? ''
+        const lastName = nameParts.slice(1).join(' ') || nameParts[0]
+
+        await this.prisma.userAccount.update({
+          where: { id: workerRecord.userId },
+          data: { firstName, lastName },
+        })
+        this.logger.log({ workerId, userId: workerRecord.userId }, 'verified_name_propagated')
+      }
+    }
+
+    // Set profilePhotoUrl on UserAccount from live selfie if user doesn't have one yet
+    if (result.success && params.livePhotoBase64 && workerRecord.userId) {
+      const existingUser = await this.prisma.userAccount.findUnique({
+        where: { id: workerRecord.userId },
+        select: { profilePhotoUrl: true },
+      })
+      if (!existingUser?.profilePhotoUrl) {
+        // Store a sentinel URL pointing to the encrypted photo endpoint
+        await this.prisma.userAccount.update({
+          where: { id: workerRecord.userId },
+          data: { profilePhotoUrl: `/identity/workers/${workerId}/photo` },
+        })
+        this.logger.log({ workerId, userId: workerRecord.userId }, 'profile_photo_url_set')
+      }
+    }
 
     if (result.success) {
       await this.trustScore.emitEvent({
@@ -331,6 +364,32 @@ export class IdentityService {
     if (requesterRole === 'WORKER' && w?.userId !== requesterId) return null
     if (!w?.profilePhotoEncrypted) return null
     return this.encryption.decrypt(w.profilePhotoEncrypted)
+  }
+
+  // ── Verified profile endpoint (for the authenticated worker themselves) ────
+
+  async getVerifiedProfile(userId: string, institutionId: string) {
+    const worker = await this.prisma.workerProfile.findFirst({
+      where: { userId, institutionId },
+      include: { identityVerification: true },
+    })
+
+    if (!worker?.identityVerification) {
+      return { verified: false }
+    }
+
+    const iv = worker.identityVerification
+    return {
+      verified: ['FULLY_VERIFIED', 'PARTIALLY_VERIFIED'].includes(iv.status),
+      status: iv.status,
+      verifiedAt: iv.verifiedAt,
+      faceMatchPassed: iv.faceMatchPassed,
+      provider: iv.providerName,
+      // Decrypt only what is safe to return (no raw NIN/BVN)
+      verifiedName: iv.verifiedLegalName ? this.encryption.decrypt(iv.verifiedLegalName) : null,
+      verifiedDOB: iv.verifiedDOB ? this.encryption.decrypt(iv.verifiedDOB) : null,
+      verifiedGender: iv.verifiedGender ? this.encryption.decrypt(iv.verifiedGender) : null,
+    }
   }
 
   private assertCanManageWorker(workerUserId: string, requesterId: string, requesterRole: string) {

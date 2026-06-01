@@ -1,16 +1,16 @@
 const FEATURES = [
-  { icon: '🪪', title: 'Identity Verification', desc: 'NIN, BVN, and CAC verification via Prembly. Face match. Credentials. Workers confirmed before they set foot on site.', tag: 'Core' },
-  { icon: '⭐', title: 'Trust Score Engine', desc: 'Algorithmic, time-decayed trust scores built from real deployments, ratings, endorsements, and incidents. Configurable per institution.', tag: 'Core' },
-  { icon: '📋', title: 'Workforce Registry', desc: 'Permanent, searchable registry of every worker your institution has ever engaged. Never lose institutional memory again.', tag: 'Core' },
-  { icon: '🏢', title: 'Organisation Registry', desc: 'Register service companies with branches and teams. CAC-verified. Know which company is trusted before signing any contract.', tag: 'Core' },
-  { icon: '👍', title: 'Community Endorsements', desc: 'Named, weighted endorsements from institutional operators and community members. Not anonymous stars — real accountability.', tag: 'Trust' },
-  { icon: '📊', title: 'Community Trust Passport', desc: 'A shareable credential that travels with every worker. Legal name, verified face, trust grade, and full deployment history.', tag: 'Trust' },
-  { icon: '⚡', title: 'Emergency Mobilisation', desc: 'Find and deploy the nearest available verified workers in seconds. Built for estate power outages, security incidents, and event crises.', tag: 'Operations' },
-  { icon: '📝', title: 'Service Requests', desc: 'Structured request pipeline from DRAFT to COMPLETED. Set minimum trust scores, match workers, assign, track, and review.', tag: 'Operations' },
+  { icon: '🛡️', title: 'Trust Passport', desc: 'Every person gets a TGP-XXXXXXXX passport — portable, QR-scannable, publicly verifiable. Verified identity, community memberships, trust grade, credentials.', tag: 'Core' },
+  { icon: '🏘️', title: 'Community Hierarchy Engine', desc: 'Model any community as a verified node tree — RCCG Province → Area → Parish, or Estate → Phase → Block. Unlimited depth, configurable node types.', tag: 'Core' },
+  { icon: '🪪', title: 'NIN / BVN Verification', desc: 'Live NIN and BVN verification via Prembly IdentityPass. Face liveness detection via Amazon Rekognition. Government-grade identity at community scale.', tag: 'Core' },
+  { icon: '⭐', title: 'Trust Score Engine', desc: 'Algorithmic, time-decayed trust scores built from real deployments, ratings, endorsements, and incidents. Configurable weights per community.', tag: 'Core' },
+  { icon: '🔓', title: 'Opportunity Network', desc: 'Post trust-gated opportunities — jobs, volunteering, ministries, event roles. Only verified members who meet the score threshold can apply. No CV fraud.', tag: 'Trust' },
+  { icon: '👍', title: 'Community Endorsements', desc: 'Named, weighted endorsements from authority holders — Parish Pastors, Estate Managers, HODs. Not anonymous stars — real chain-of-authority accountability.', tag: 'Trust' },
+  { icon: '🏛️', title: 'Authority Engine', desc: 'Role-based authority assignment with permission gates. Provincial Pastors endorse parishes. Area Coordinators assign roles. No self-declared authority.', tag: 'Trust' },
+  { icon: '📝', title: 'Service Requests', desc: 'Structured request pipeline from DRAFT to COMPLETED. Set minimum trust scores, match workers, assign, track, and review in one place.', tag: 'Operations' },
   { icon: '⚠️', title: 'Incident Management', desc: 'Report, investigate, and resolve incidents. Every resolution updates the trust score. No incident is ever swept under the rug.', tag: 'Operations' },
-  { icon: '🔔', title: 'SMS + WhatsApp Alerts', desc: 'Workers receive assignment notifications via Termii SMS and WhatsApp — meeting them where they already are.', tag: 'Notifications' },
-  { icon: '🏆', title: 'Volunteer Registry', desc: 'Manage welfare workers, event volunteers, and community corps with skills, availability, and deployment history.', tag: 'Community' },
-  { icon: '⚙️', title: 'Configuration Engine', desc: 'Every trust weight, SLA rule, and category is configurable per institution. No hardcoded decisions.', tag: 'Platform' },
+  { icon: '🎨', title: 'Community White-Label', desc: 'Every community gets its own branded portal — redemption-city.trustgrid.ng or portal.rccg.org. Custom colors, logo, and name. One codebase, infinite communities.', tag: 'Platform' },
+  { icon: '🔔', title: 'SMS + WhatsApp Alerts', desc: 'Members receive opportunity alerts, verification updates, and assignment notifications via Termii SMS and WhatsApp — meeting them where they already are.', tag: 'Platform' },
+  { icon: '⚙️', title: 'Configurable Trust Engine', desc: 'Every trust weight, SLA rule, hierarchy level, and category is configurable per community. No hardcoded decisions. Your trust, your rules.', tag: 'Platform' },
 ]
 
 const TAG_COLORS: Record<string, string> = {
@@ -29,7 +29,7 @@ export default function Features() {
         <div className="text-center mb-14">
           <span className="text-indigo-400 text-sm font-semibold uppercase tracking-widest">Platform Capabilities</span>
           <h2 className="text-4xl md:text-5xl font-black text-white mt-3 mb-4">
-            Everything your institution<br />needs to govern trusted people
+            Everything communities need<br />to run on trusted people
           </h2>
           <p className="text-white/40 max-w-xl mx-auto">
             Not a feature dump — each capability solves a real governance problem that WhatsApp and Excel cannot.
