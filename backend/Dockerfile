@@ -7,8 +7,8 @@ COPY package.json ./
 COPY package-lock.json* ./
 COPY .npmrc* ./
 
-# Install all dependencies (npm install works without lockfile unlike npm ci)
-RUN npm install
+# Install build dependencies even when NODE_ENV=production is provided by the host
+RUN npm install --include=dev
 
 # Copy source
 COPY . .

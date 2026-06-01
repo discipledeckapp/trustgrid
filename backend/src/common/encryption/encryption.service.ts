@@ -183,7 +183,4 @@ export class EncryptionService {
     return createHash('sha256').update(idNumber.trim()).digest('hex')
   }
 
-  isEnabled(): boolean {
-    return this.key !== null
-  }
 }
