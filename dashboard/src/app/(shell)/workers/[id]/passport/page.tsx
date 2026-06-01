@@ -223,7 +223,7 @@ export default function TrustPassportPage() {
                     <span className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-full px-3 py-1 text-xs font-semibold">
                       <ShieldCheck className="w-3.5 h-3.5" /> NIN Confirmed
                     </span>
-                    {worker.faceMatchPassed && (
+                    {(worker as any).faceMatchPassed && (
                       <span className="inline-flex items-center gap-1.5 bg-teal-50 border border-teal-200 text-teal-700 rounded-full px-3 py-1 text-xs font-semibold">
                         <ShieldCheck className="w-3.5 h-3.5" /> Face Match ✓
                       </span>
@@ -234,13 +234,13 @@ export default function TrustPassportPage() {
             </div>
 
             {/* Credentials */}
-            {worker.credentials?.length > 0 && (
+            {(worker as any).credentials?.length > 0 && (
               <div className="px-8 py-6">
                 <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
                   Professional Credentials
                 </h2>
                 <div className="flex flex-wrap gap-2">
-                  {worker.credentials.map((c: any) => (
+                  {(worker as any).credentials.map((c: any) => (
                     <CredentialBadge key={c.id} name={c.credentialType} isVerified={c.isVerified} />
                   ))}
                 </div>

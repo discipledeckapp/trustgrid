@@ -26,6 +26,9 @@ import { CatalogModule } from './modules/catalog/catalog.module'
 import { BillingModule } from './modules/billing/billing.module'
 import { ConfigModule as AppConfigModule } from './modules/config/config.module'
 import { OnboardingModule } from './modules/onboarding/onboarding.module'
+import { CommunityModule } from './modules/community/community.module'
+import { AuthorityModule } from './modules/authority/authority.module'
+import { TrustPassportModule } from './modules/trust-passport/trust-passport.module'
 import { pinoLoggerConfig } from './common/logger/logger.config'
 
 @Module({
@@ -69,6 +72,11 @@ import { pinoLoggerConfig } from './common/logger/logger.config'
     VolunteersModule,
     AnalyticsModule,
     AppConfigModule,
+
+    // Community Trust Infrastructure (Vision Refactor)
+    CommunityModule,
+    AuthorityModule,
+    TrustPassportModule,
   ],
 })
 export class AppModule {}

@@ -996,3 +996,403 @@ model InstitutionCatalogOverride {
   @@unique([institutionId, categoryId])
   @@map("institution_catalog_overrides")
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COMMUNITY TRUST INFRASTRUCTURE — v2.0
+// ═══════════════════════════════════════════════════════════════════════════
+// The foundational data model for TrustGrid as Community Trust Infrastructure.
+// Everything revolves around the Trust Graph:
+//   CommunityNode (hierarchy) → Membership → AuthorityAssignment →
+//   TrustCredential → TrustPassport → Endorsement
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ─── Enums ────────────────────────────────────────────────────────────────
+
+enum CommunityNodeStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+  REVOKED
+}
+
+enum MembershipType {
+  RESIDENT
+  WORKER
+  VOLUNTEER
+  ASSOCIATE
+  AUTHORITY
+  VISITOR
+}
+
+enum MembershipStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+  TRANSFERRED
+}
+
+enum MembershipVerificationLevel {
+  SELF_DECLARED     // Person claims membership
+  PEER_VOUCHED      // Another member vouched
+  AUTHORITY_ISSUED  // An authority role confirmed
+  BIOMETRIC         // NIN verified + face matched
+}
+
+enum AuthorityAssignmentStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+  SUSPENDED
+}
+
+enum TrustCredentialStatus {
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+enum OpportunityType {
+  VOLUNTEER
+  JOB
+  PROJECT
+  EVENT_STAFFING
+  MINISTRY
+  SERVICE_REQUEST
+  INTERNSHIP
+}
+
+enum OpportunityStatus {
+  DRAFT
+  OPEN
+  FILLED
+  CLOSED
+  CANCELLED
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+}
+
+// ─── Community Node Type ──────────────────────────────────────────────────
+// Defines the hierarchy levels for a tenant.
+// RCCG: Global → Continent → Country → Region → Province → Zone → Area → Parish
+// Estate: Estate → Phase → Street → Block
+
+model CommunityNodeType {
+  id           String   @id @default(cuid())
+  institutionId String
+  name         String   // "Province", "Area", "Parish", "Estate", "Block"
+  pluralName   String?  // "Provinces", "Areas", "Parishes"
+  level        Int      // 1 = top, higher number = deeper
+  icon         String?
+  color        String?
+  canVerifyChildren Boolean @default(true)
+  canIssueCredentials Boolean @default(true)
+  canPublishOpportunities Boolean @default(true)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  nodes        CommunityNode[]
+
+  @@unique([institutionId, level])
+  @@map("community_node_types")
+}
+
+// ─── Community Node ───────────────────────────────────────────────────────
+// The core hierarchical unit. Every organized community is a node.
+
+model CommunityNode {
+  id              String              @id @default(cuid())
+  institutionId   String
+  typeId          String
+  name            String
+  slug            String
+  description     String?
+  externalCode    String?             // e.g. RCCG parish code
+  logoUrl         String?
+  address         String?
+  city            String?
+  state           String?
+  country         String              @default("NG")
+
+  // Hierarchy
+  parentId        String?
+  depth           Int                 @default(0)
+
+  // Verification chain
+  status          CommunityNodeStatus @default(PENDING_VERIFICATION)
+  verifiedById    String?             // which node verified this node
+  verifiedAt      DateTime?
+  verificationNotes String?
+
+  // Trust metrics (computed/cached)
+  memberCount     Int                 @default(0)
+  activeCredentialCount Int           @default(0)
+  avgTrustScore   Float?
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  createdBy       String?
+
+  type            CommunityNodeType   @relation(fields: [typeId], references: [id])
+  parent          CommunityNode?      @relation("NodeHierarchy", fields: [parentId], references: [id])
+  children        CommunityNode[]     @relation("NodeHierarchy")
+  memberships     Membership[]
+  authorityAssignments AuthorityAssignment[]
+  opportunities   Opportunity[]
+  issuedCredentials TrustCredential[] @relation("IssuingNode")
+  verifiedNodes   CommunityNode[]     @relation("NodeVerification")
+  verifyingNode   CommunityNode?      @relation("NodeVerification", fields: [verifiedById], references: [id])
+
+  @@unique([institutionId, slug])
+  @@index([institutionId, parentId])
+  @@index([institutionId, status])
+  @@map("community_nodes")
+}
+
+// ─── Membership ───────────────────────────────────────────────────────────
+// A person's verified belonging to a Community Node.
+
+model Membership {
+  id                  String                    @id @default(cuid())
+  nodeId              String
+  userId              String
+  institutionId       String
+  type                MembershipType            @default(RESIDENT)
+  status              MembershipStatus          @default(PENDING)
+  verificationLevel   MembershipVerificationLevel @default(SELF_DECLARED)
+
+  // Who verified this membership
+  verifiedById        String?                   // userId of the authority who confirmed
+  verifiedAt          DateTime?
+  verificationNotes   String?
+
+  // Lifecycle
+  joinedAt            DateTime                  @default(now())
+  expiresAt           DateTime?
+  revokedAt           DateTime?
+  revokedReason       String?
+  transferredToNodeId String?
+
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+
+  node                CommunityNode             @relation(fields: [nodeId], references: [id])
+
+  @@unique([nodeId, userId])
+  @@index([userId, institutionId])
+  @@index([nodeId, status])
+  @@map("memberships")
+}
+
+// ─── Authority Role ───────────────────────────────────────────────────────
+// Defines what a role can do within a community node.
+
+model AuthorityRole {
+  id                    String   @id @default(cuid())
+  institutionId         String
+  name                  String   // "Parish Pastor", "Area Coordinator", "Estate Manager"
+  description           String?
+  level                 Int      @default(0)  // higher = more authority
+
+  // Permissions
+  canEndorseMemberships   Boolean @default(false)
+  canIssueTrustCredentials Boolean @default(false)
+  canVerifyChildNodes     Boolean @default(false)
+  canPublishOpportunities Boolean @default(true)
+  canApproveApplications  Boolean @default(false)
+  canAssignRoles          Boolean @default(false)  // can delegate to lower-level roles
+  canViewPrivateData      Boolean @default(false)
+  canManageIncidents      Boolean @default(true)
+  canBlacklist            Boolean @default(false)
+
+  nodeTypeScope String?   // null = any node type, or restrict to specific type
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  assignments   AuthorityAssignment[]
+
+  @@unique([institutionId, name])
+  @@map("authority_roles")
+}
+
+// ─── Authority Assignment ─────────────────────────────────────────────────
+// Assigns an authority role to a person at a specific community node.
+
+model AuthorityAssignment {
+  id            String                  @id @default(cuid())
+  userId        String
+  roleId        String
+  nodeId        String
+  institutionId String
+
+  // Who granted this assignment
+  grantedById   String
+  grantedAt     DateTime                @default(now())
+
+  status        AuthorityAssignmentStatus @default(ACTIVE)
+  expiresAt     DateTime?
+  revokedAt     DateTime?
+  revokedById   String?
+  revokedReason String?
+
+  notes         String?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  role          AuthorityRole           @relation(fields: [roleId], references: [id])
+  node          CommunityNode           @relation(fields: [nodeId], references: [id])
+
+  @@index([userId, institutionId, status])
+  @@index([nodeId, status])
+  @@map("authority_assignments")
+}
+
+// ─── Trust Passport ───────────────────────────────────────────────────────
+// The portable, verifiable identity document for every person in TrustGrid.
+// One passport per person. Globally unique passport code.
+
+model TrustPassport {
+  id             String   @id @default(cuid())
+  passportCode   String   @unique    // TGP-92A81 — human-readable, URL-safe
+  userId         String   @unique    // one passport per person
+  institutionId  String
+
+  // Public verification
+  isPublic       Boolean  @default(true)  // whether verify URL works publicly
+  verifyUrl      String?  // https://verify.trustgrid.ng/TGP-92A81
+  qrCodeData     String?  // base64 QR code image
+
+  // Validity
+  issuedAt       DateTime @default(now())
+  expiresAt      DateTime?
+  lastVerifiedAt DateTime?
+  status         TrustCredentialStatus @default(ACTIVE)
+
+  // Cached summary (updated on trust events)
+  trustScore     Float    @default(0)
+  trustGrade     String   @default("F")
+  credentialCount Int     @default(0)
+  endorsementCount Int    @default(0)
+  primaryCommunity String?  // name of primary community node
+  primaryRole    String?    // most significant authority role
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  credentials    TrustCredential[]
+
+  @@index([institutionId])
+  @@map("trust_passports")
+}
+
+// ─── Trust Credential ─────────────────────────────────────────────────────
+// A specific verifiable credential on a Trust Passport.
+// Examples: "Verified Parish Member", "RCCG Convention Volunteer 2026",
+//           "Certified Electrician (COREN)", "Estate Committee Member"
+
+model TrustCredential {
+  id              String               @id @default(cuid())
+  passportId      String
+  institutionId   String
+
+  credentialType  String               // "VERIFIED_RESIDENT", "PARISH_MEMBER", "CERTIFIED_ELECTRICIAN"
+  label           String               // Human-readable: "Verified Parish Member"
+  description     String?
+  category        String?              // "MEMBERSHIP", "PROFESSIONAL", "COMMUNITY_ROLE", "EVENT"
+
+  // Issuing authority
+  issuingNodeId   String?              // community node that issued this
+  issuingUserId   String?              // authority who issued it
+  issuingRoleName String?              // role name of issuer
+
+  status          TrustCredentialStatus @default(ACTIVE)
+  issuedAt        DateTime             @default(now())
+  expiresAt       DateTime?
+  revokedAt       DateTime?
+  revokedById     String?
+  revokedReason   String?
+
+  // Verification
+  verifyUrl       String?              // deep link to verify this specific credential
+  metadata        Json                 @default("{}")
+
+  passport        TrustPassport        @relation(fields: [passportId], references: [id])
+  issuingNode     CommunityNode?       @relation("IssuingNode", fields: [issuingNodeId], references: [id])
+
+  @@index([passportId, status])
+  @@index([institutionId, credentialType])
+  @@map("trust_credentials")
+}
+
+// ─── Opportunity ─────────────────────────────────────────────────────────
+// Trust-gated call to action published by a community node.
+
+model Opportunity {
+  id              String          @id @default(cuid())
+  institutionId   String
+  publishingNodeId String
+
+  type            OpportunityType
+  title           String
+  description     String
+  location        String?
+  startDate       DateTime?
+  endDate         DateTime?
+  slotsAvailable  Int?
+  slotsFilled     Int             @default(0)
+
+  // Trust gate — who can see and apply
+  requiresMembership Boolean      @default(true)
+  requiredNodeIds    String[]     // must be member of at least one of these nodes
+  minimumTrustScore  Float?
+  requiredCredentials String[]    // credential types required
+  requiredEndorsementTypes String[] // endorsement types required
+  noOpenIncidents    Boolean      @default(false)
+  maxIncidentAge     Int?         // max days since last incident
+
+  // Skills
+  requiredSkills  String[]
+  categoryIds     String[]
+
+  status          OpportunityStatus @default(DRAFT)
+  publishedAt     DateTime?
+  closedAt        DateTime?
+
+  createdById     String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  publishingNode  CommunityNode   @relation(fields: [publishingNodeId], references: [id])
+  applications    OpportunityApplication[]
+
+  @@index([institutionId, status])
+  @@index([publishingNodeId, status])
+  @@map("opportunities")
+}
+
+// ─── Opportunity Application ──────────────────────────────────────────────
+model OpportunityApplication {
+  id             String            @id @default(cuid())
+  opportunityId  String
+  applicantId    String            // userId
+  institutionId  String
+  status         ApplicationStatus @default(PENDING)
+  appliedAt      DateTime          @default(now())
+  reviewedAt     DateTime?
+  reviewedById   String?
+  reviewNotes    String?
+  message        String?
+
+  opportunity    Opportunity       @relation(fields: [opportunityId], references: [id])
+
+  @@unique([opportunityId, applicantId])
+  @@map("opportunity_applications")
+}

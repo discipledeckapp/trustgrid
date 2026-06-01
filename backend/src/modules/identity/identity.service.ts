@@ -381,7 +381,7 @@ export class IdentityService {
         rcNumber: dto.rcNumber,
         representativeNinHash,
         representativeIsDirector,
-        cacDirectors: encryptedDirectors,
+        cacDirectors: encryptedDirectors as any,
       },
     })
 
