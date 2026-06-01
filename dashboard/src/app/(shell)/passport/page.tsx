@@ -47,27 +47,37 @@ export default function PassportPage() {
     queryFn: () => api.get('/passport/me').then(r => r.data),
   })
 
-  async function downloadPDF() {
-    if (!passportCardRef.current) return
+  async function captureCard() {
+    if (!passportCardRef.current) return null
     const { default: html2canvas } = await import('html2canvas')
-    const { default: jsPDF } = await import('jspdf')
-
-    const canvas = await html2canvas(passportCardRef.current, {
-      scale: 2,
+    return html2canvas(passportCardRef.current, {
+      scale: 3,
       backgroundColor: null,
       useCORS: true,
       allowTaint: true,
     })
+  }
 
+  async function downloadPDF() {
+    const canvas = await captureCard()
+    if (!canvas) return
+    const { default: jsPDF } = await import('jspdf')
     const imgData = canvas.toDataURL('image/png')
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-
-    const pageWidth  = pdf.internal.pageSize.getWidth()
-    const imgWidth   = pageWidth - 20
-    const imgHeight  = (canvas.height * imgWidth) / canvas.width
-
+    const pageWidth = pdf.internal.pageSize.getWidth()
+    const imgWidth  = pageWidth - 20
+    const imgHeight = (canvas.height * imgWidth) / canvas.width
     pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight)
-    pdf.save(`TrustPassport-${passport?.passport?.passportCode ?? 'TGP'}.pdf`)
+    pdf.save(`TrustPassport-${passportCode ?? 'TGP'}.pdf`)
+  }
+
+  async function downloadImage() {
+    const canvas = await captureCard()
+    if (!canvas) return
+    const link = document.createElement('a')
+    link.download = `TrustPassport-${passportCode ?? 'TGP'}.png`
+    link.href = canvas.toDataURL('image/png')
+    link.click()
   }
 
   function copyPassportUrl() {
@@ -118,6 +128,10 @@ export default function PassportPage() {
               {copied ? 'Copied!' : 'Copy Link'}
             </button>
           )}
+          <button onClick={downloadImage}
+            className="flex items-center gap-1.5 border border-gray-200 rounded-xl px-4 py-2 text-sm font-semibold text-gray-600 hover:border-indigo-300 transition-colors">
+            <Download className="w-4 h-4" /> Save Image
+          </button>
           <button onClick={downloadPDF}
             className="flex items-center gap-1.5 border border-gray-200 rounded-xl px-4 py-2 text-sm font-semibold text-gray-600 hover:border-indigo-300 transition-colors">
             <Download className="w-4 h-4" /> Download PDF
