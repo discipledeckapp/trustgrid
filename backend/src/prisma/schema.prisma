@@ -927,3 +927,72 @@ model AuditLog {
   @@index([entityType, entityId])
   @@map("audit_logs")
 }
+
+// ═══════════════════════════════════════════════════════
+// PLATFORM CATALOG
+// ═══════════════════════════════════════════════════════
+// The master catalog of service categories managed by Platform Admin.
+// Institutions choose which categories apply to them and can set
+// institution-specific overrides (different min trust score, etc.)
+
+model PlatformCatalogDomain {
+  id          String   @id @default(cuid())
+  name        String   @unique   // "Professional Services", "Technical & Trades"
+  description String?
+  icon        String?
+  color       String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categories  PlatformCatalogCategory[]
+
+  @@map("platform_catalog_domains")
+}
+
+model PlatformCatalogCategory {
+  id                    String   @id @default(cuid())
+  domainId              String
+  name                  String                      // "Corporate Lawyer", "Electrical"
+  slug                  String   @unique            // "corporate-lawyer", "electrical"
+  description           String?
+  icon                  String?
+  color                 String?  @default("#6B7280")
+  skills                String[] @default([])       // list of skill tags
+  requiredCertifications String[] @default([])      // e.g. ["COREN","NBA Membership"]
+  allowedWorkerTypes    String[] @default(["CONTRACTOR","FREELANCER"])
+  defaultMinTrustScore  Int      @default(50)
+  isProfessional        Boolean  @default(false)    // professional vs artisan
+  requiresLicence       Boolean  @default(false)
+  sortOrder             Int      @default(0)
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  createdBy             String?  // platform admin user ID
+
+  domain                PlatformCatalogDomain  @relation(fields: [domainId], references: [id])
+  institutionOverrides  InstitutionCatalogOverride[]
+
+  @@index([domainId, isActive])
+  @@map("platform_catalog_categories")
+}
+
+// Institution-level override for a catalog category
+// Lets institutions keep the platform defaults but adjust min trust score,
+// or disable categories that don't apply to their context
+model InstitutionCatalogOverride {
+  id            String   @id @default(cuid())
+  institutionId String
+  categoryId    String
+  isEnabled     Boolean  @default(true)
+  minTrustScore Int?     // overrides platform default
+  customLabel   String?  // rename for their context
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  category      PlatformCatalogCategory @relation(fields: [categoryId], references: [id])
+
+  @@unique([institutionId, categoryId])
+  @@map("institution_catalog_overrides")
+}

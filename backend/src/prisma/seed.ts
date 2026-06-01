@@ -3,7 +3,20 @@
  * Populates the RCCG Convention Operations scenario for the hackathon demo
  */
 
-import { PrismaClient, WorkerType, InstitutionType } from '@prisma/client';
+import { PrismaClient, WorkerType, InstitutionType } from '@prisma/client'
+
+// ── Platform Catalog seed data ─────────────────────────────────────────────
+const CATALOG_DOMAINS = [
+  { name: 'Technical & Trades',     description: 'Skilled tradespeople and technical service providers', icon: 'wrench',    color: '#F59E0B', sortOrder: 1 },
+  { name: 'Professional Services',  description: 'Qualified professionals with recognised credentials',  icon: 'briefcase', color: '#4F46E5', sortOrder: 2 },
+  { name: 'Healthcare & Wellness',  description: 'Medical professionals, caregivers, and wellness experts', icon: 'heart', color: '#EF4444', sortOrder: 3 },
+  { name: 'Security & Safety',      description: 'Security guards, supervisors, and safety officers',   icon: 'shield',    color: '#6366F1', sortOrder: 4 },
+  { name: 'Events & Hospitality',   description: 'Event management, catering, and hospitality staff',   icon: 'calendar',  color: '#8B5CF6', sortOrder: 5 },
+  { name: 'Transport & Logistics',  description: 'Drivers, dispatch riders, and logistics coordinators', icon: 'truck',    color: '#0EA5E9', sortOrder: 6 },
+  { name: 'Facility Management',    description: 'Cleaning, domestic services, and facility maintenance', icon: 'home',    color: '#10B981', sortOrder: 7 },
+  { name: 'Education & Training',   description: 'Teachers, tutors, and corporate trainers',             icon: 'book',     color: '#F97316', sortOrder: 8 },
+  { name: 'Creative & Media',       description: 'Photographers, designers, and media professionals',   icon: 'camera',   color: '#EC4899', sortOrder: 9 },
+];
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient()
@@ -553,6 +566,41 @@ async function seed() {
   })
 
   console.log('✓ Created all demo user types')
+
+  // ── Seed platform catalog ──────────────────────────────────────────────────
+  await prisma.institutionCatalogOverride.deleteMany()
+  await prisma.platformCatalogCategory.deleteMany()
+  await prisma.platformCatalogDomain.deleteMany()
+
+  for (const domainData of CATALOG_DOMAINS) {
+    const domain = await prisma.platformCatalogDomain.create({ data: domainData })
+
+    // Get categories for this domain from FULL_SERVICE_CATALOG
+    const domainCategories = FULL_SERVICE_CATALOG.filter(c => c.domain === domainData.name)
+
+    for (let i = 0; i < domainCategories.length; i++) {
+      const cat = domainCategories[i]
+      const slug = cat.name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')
+      await prisma.platformCatalogCategory.create({
+        data: {
+          domainId: domain.id,
+          name: cat.name,
+          slug: `${slug}-${domain.id.slice(-4)}`,
+          skills: cat.skills ?? [],
+          requiredCertifications: cat.requiresCertification ?? [],
+          allowedWorkerTypes: cat.workerTypes ?? ['CONTRACTOR','FREELANCER'],
+          defaultMinTrustScore: cat.defaultMinTrustScore ?? 50,
+          isProfessional: domainData.name === 'Professional Services' || domainData.name === 'Healthcare & Wellness',
+          requiresLicence: (cat.requiresCertification ?? []).length > 0,
+          color: domainData.color,
+          sortOrder: i,
+          createdBy: adminUser.id,
+        },
+      })
+    }
+  }
+
+  console.log(`✓ Seeded platform catalog: ${CATALOG_DOMAINS.length} domains, ${FULL_SERVICE_CATALOG.length} categories`)
 
   console.log('\n✅ Demo seed complete!\n');
   console.log('📋 Demo Data Summary:');
