@@ -1,7 +1,7 @@
 const FEATURES = [
   { icon: '🛡️', title: 'Trust Passport', desc: 'Every person gets a TGP-XXXXXXXX passport — portable, QR-scannable, publicly verifiable. Verified identity, community memberships, trust grade, credentials.', tag: 'Core' },
   { icon: '🏘️', title: 'Community Hierarchy Engine', desc: 'Model any community as a verified node tree — RCCG Province → Area → Parish, or Estate → Phase → Block. Unlimited depth, configurable node types.', tag: 'Core' },
-  { icon: '🪪', title: 'NIN / BVN Verification', desc: 'Live NIN and BVN verification via Prembly IdentityPass. Face liveness detection via Amazon Rekognition. Government-grade identity at community scale.', tag: 'Core' },
+  { icon: '🪪', title: 'NIN / BVN Verification', desc: 'Live NIN and BVN verification against Nigerian government records. Face liveness detection. Government-grade identity at community scale.', tag: 'Core' },
   { icon: '⭐', title: 'Trust Score Engine', desc: 'Algorithmic, time-decayed trust scores built from real deployments, ratings, endorsements, and incidents. Configurable weights per community.', tag: 'Core' },
   { icon: '🔓', title: 'Opportunity Network', desc: 'Post trust-gated opportunities — jobs, volunteering, ministries, event roles. Only verified members who meet the score threshold can apply. No CV fraud.', tag: 'Trust' },
   { icon: '👍', title: 'Community Endorsements', desc: 'Named, weighted endorsements from authority holders — Parish Pastors, Estate Managers, HODs. Not anonymous stars — real chain-of-authority accountability.', tag: 'Trust' },

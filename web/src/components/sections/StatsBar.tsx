@@ -1,5 +1,5 @@
 const STATS = [
-  { value: 'NIN + BVN',  label: 'Live Verification',      sub: 'via Prembly IdentityPass' },
+  { value: 'NIN + BVN',  label: 'Government Verification',  sub: 'Face match · NIMC · CAC' },
   { value: '7-Level',    label: 'Community Hierarchy',     sub: 'Global down to Parish' },
   { value: '3',          label: 'Verification Pathways',   sub: 'Liveness · Upload · Agent' },
   { value: 'TGP-',       label: 'Trust Passport Format',   sub: 'QR-scannable, publicly verifiable' },
