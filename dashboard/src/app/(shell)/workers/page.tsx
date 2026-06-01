@@ -7,12 +7,19 @@ import { WorkerCard } from '@/components/workers/WorkerCard'
 import { cn } from '@/lib/utils'
 
 const SKILL_FILTERS = [
-  { label: 'All Skills', value: '' },
+  { label: 'All',            value: '' },
+  // Professionals
+  { label: '⚖️ Lawyer',     value: 'Lawyer' },
+  { label: '💻 Software',   value: 'Software Engineer' },
+  { label: '💰 Accountant', value: 'Accountant' },
+  { label: '🩺 Healthcare', value: 'Nurse' },
+  { label: '📐 Architect',  value: 'Architect' },
+  // Artisans
   { label: '⚡ Electrician', value: 'Electrician' },
-  { label: '💧 Plumber', value: 'Plumber' },
-  { label: '🛡️ Security', value: 'Security Guard' },
-  { label: '✨ Cleaner', value: 'Cleaner' },
-  { label: '🔧 General', value: 'General Labour' },
+  { label: '💧 Plumber',    value: 'Plumber' },
+  { label: '🛡️ Security',  value: 'Security Guard' },
+  { label: '✨ Cleaner',    value: 'Cleaner' },
+  { label: '🔧 General',    value: 'General Labour' },
 ]
 
 export default function WorkersPage() {

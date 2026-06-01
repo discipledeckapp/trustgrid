@@ -149,6 +149,8 @@ const NIGERIAN_LAST_NAMES = [
   'Otunola', 'Oyinloye', 'Ayoade', 'Bakare', 'Oyelaran', 'Ayanwale',
 ];
 
+// ── Skill sets ───────────────────────────────────────────────────────────────
+
 const ELECTRICIAN_SKILLS = [
   ['Electrician', 'Panel Wiring', 'Generator Maintenance'],
   ['Electrician', 'Solar Installation', 'Inverter Systems'],
@@ -157,12 +159,28 @@ const ELECTRICIAN_SKILLS = [
   ['Electrician', 'Stage Lighting', 'Event Power Systems'],
 ];
 
+const PROFESSIONAL_SKILLS = [
+  ['Lawyer', 'Corporate Law', 'Contract Drafting'],
+  ['Lawyer', 'Commercial Litigation', 'Legal Advisory'],
+  ['Software Engineer', 'Full-Stack Development', 'React', 'Node.js'],
+  ['Software Engineer', 'Mobile Development', 'Flutter', 'DevOps'],
+  ['Accountant', 'Financial Reporting', 'ICAN Certified'],
+  ['Accountant', 'Tax Advisory', 'Audit'],
+  ['Nurse', 'Emergency Care', 'Community Health'],
+  ['Architect', 'Structural Design', 'AutoCAD'],
+  ['Project Manager', 'PMP Certified', 'Agile'],
+  ['Civil Engineer', 'COREN Certified', 'Site Supervision'],
+];
+
 const GENERAL_SKILLS = [
   ['General Labour', 'Equipment Handling'],
   ['Loading & Offloading', 'General Labour'],
-  ['Cleaning', 'General Labour', 'Event Setup'],
+  ['Cleaner', 'General Labour', 'Event Setup'],
   ['Event Setup', 'Stage Crew'],
-  ['Crowd Management', 'General Labour'],
+  ['Security Guard', 'Crowd Management'],
+  ['Plumber', 'Pipe Fitting', 'Drainage Systems'],
+  ['Carpenter', 'Furniture Making', 'Joinery'],
+  ['Mason', 'Tiling', 'Bricklaying'],
 ];
 
 function randomElement<T>(arr: T[]): T {
@@ -173,29 +191,35 @@ function randomBetween(min: number, max: number): number {
   return Math.random() * (max - min) + min;
 }
 
-// Realistic diverse Nigerian professional photos from Unsplash (public domain)
-const WORKER_PHOTOS = [
+// ── Role-appropriate Unsplash photos ─────────────────────────────────────────
+// Professional/office photos (suits, office environments, formal attire)
+const PROFESSIONAL_PHOTOS = [
+  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop&crop=face', // man suit
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face', // woman professional
+  'https://images.unsplash.com/photo-1580489944761-15a19d674916?w=200&h=200&fit=crop&crop=face', // woman suit
+  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&h=200&fit=crop&crop=face', // man shirt
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face', // man professional
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=face', // woman smiling
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face', // man glasses
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face', // man outdoor
+  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=200&h=200&fit=crop&crop=face', // woman glasses
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face', // woman smiling
+];
+
+// Trade/artisan photos (working attire, tools, outdoor)
+const ARTISAN_PHOTOS = [
   'https://images.unsplash.com/photo-1531384441138-2736e62e0919?w=200&h=200&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face',
   'https://images.unsplash.com/photo-1546961342-ea5f62d0e9fc?w=200&h=200&fit=crop&crop=face',
   'https://images.unsplash.com/photo-1583864697784-a0efc8379f70?w=200&h=200&fit=crop&crop=face',
   'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop&crop=face',
   'https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?w=200&h=200&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face',
   'https://images.unsplash.com/photo-1504257432389-52343af06ae3?w=200&h=200&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&h=200&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1580489944761-15a19d674916?w=200&h=200&fit=crop&crop=face',
   'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face',
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&crop=face',
   'https://images.unsplash.com/photo-1521119989659-a83eee488004?w=200&h=200&fit=crop&crop=face',
-  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=200&h=200&fit=crop&crop=face',
   'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?w=200&h=200&fit=crop&crop=face',
   'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&h=200&fit=crop&crop=face',
-]
+];
 
 function generatePhone(): string {
   const prefixes = ['0803', '0806', '0813', '0816', '0701', '0706', '0813', '0907'];
@@ -319,19 +343,26 @@ async function seed() {
 
   console.log(`✓ Created admin: ${adminUser.firstName} ${adminUser.lastName}`);
 
-  // Create 65 workers (electricians + general workers)
+  // Create 75 workers: 20 professionals, 35 electricians, 20 general/trades
   const workerProfiles: Array<{ id: string; userId: string; trustScore: number }> = [];
 
-  for (let i = 0; i < 65; i++) {
+  for (let i = 0; i < 75; i++) {
     const firstName = randomElement(NIGERIAN_FIRST_NAMES);
     const lastName = randomElement(NIGERIAN_LAST_NAMES);
-    const isElectrician = i < 48; // 48 electricians, 17 general workers
 
-    const skillSet = isElectrician
-      ? randomElement(ELECTRICIAN_SKILLS)
-      : randomElement(GENERAL_SKILLS);
+    const isProfessional = i < 20;
+    const isElectrician  = i >= 20 && i < 55;
 
-    const photoUrl = WORKER_PHOTOS[i % WORKER_PHOTOS.length]
+    const skillSet = isProfessional
+      ? randomElement(PROFESSIONAL_SKILLS)
+      : isElectrician
+        ? randomElement(ELECTRICIAN_SKILLS)
+        : randomElement(GENERAL_SKILLS);
+
+    // Role-appropriate photo
+    const photoUrl = isProfessional
+      ? PROFESSIONAL_PHOTOS[i % PROFESSIONAL_PHOTOS.length]
+      : ARTISAN_PHOTOS[(i - 20) % ARTISAN_PHOTOS.length]
 
     const user = await prisma.userAccount.create({
       data: {
@@ -364,7 +395,11 @@ async function seed() {
         userId: user.id,
         primarySkill: skillSet[0],
         skills: skillSet,
-        categoryIds: isElectrician ? ['cat_electrical'] : ['cat_general', 'cat_event'],
+        categoryIds: isProfessional
+          ? ['cat_professional', 'cat_legal', 'cat_tech']
+          : isElectrician
+            ? ['cat_electrical']
+            : ['cat_general', 'cat_event'],
         workerType: WorkerType.CONTRACTOR,
         isAvailable: baseTrustScore >= 40,
         verificationStatus: isVerified ? 'FULLY_VERIFIED' : 'UNVERIFIED',
@@ -652,8 +687,9 @@ async function seed() {
   console.log('   RESIDENT:             08001234571  (Funke Adeola — community member)');
   console.log(`   Institution ID: ${institution.id}`);
   console.log(`   Workers seeded: ${workerProfiles.length}`);
-  console.log(`     - Electricians: 48`);
-  console.log(`     - General workers: 17`);
+  console.log(`     - Professionals (Lawyers, Engineers, Accountants...): 20`);
+  console.log(`     - Electricians: 35`);
+  console.log(`     - General/Trades: 20`);
   console.log(`   Service Request: ${serviceRequest.title}`);
   console.log(`   Service Request ID: ${serviceRequest.id}`);
   console.log('\n🎯 Demo flow:');

@@ -4,59 +4,67 @@ import { useState } from 'react'
 
 /* ─── Dashboard mockup data ─────────────────────────────────── */
 const WORKERS = [
+  // Professionals — suit/office photos
   {
-    name: 'Adaeze M.',
-    role: 'Electrician',
+    name: 'Ngozi C.',
+    role: 'Corporate Lawyer',
     grade: 'A+',
-    score: 96,
-    jobs: 23,
+    score: 97,
+    jobs: 42,
+    verified: true,
     gradeColor: '#10B981',
-    img: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=300&fit=crop',
+    img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&crop=face',
   },
   {
     name: 'Chukwuemeka A.',
-    role: 'Panel Wiring',
+    role: 'Software Engineer',
     grade: 'A+',
     score: 91,
-    jobs: 18,
+    jobs: 28,
+    verified: true,
     gradeColor: '#10B981',
-    img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop',
+    img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
   },
   {
+    name: 'Amaka E.',
+    role: 'Accountant',
+    grade: 'A',
+    score: 88,
+    jobs: 35,
+    verified: true,
+    gradeColor: '#14B8A6',
+    img: 'https://images.unsplash.com/photo-1580489944761-15a19d674916?w=400&h=400&fit=crop&crop=face',
+  },
+  // Artisans — working photos
+  {
     name: 'Babatunde O.',
-    role: 'Generator Tech',
+    role: 'Electrician',
     grade: 'A',
     score: 87,
     jobs: 31,
+    verified: true,
     gradeColor: '#14B8A6',
-    img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=300&fit=crop',
-  },
-  {
-    name: 'Emeka N.',
-    role: 'Electrician',
-    grade: 'B+',
-    score: 76,
-    jobs: 14,
-    gradeColor: '#6366F1',
-    img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=300&fit=crop',
+    img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
   },
   {
     name: 'Segun F.',
-    role: 'Electrician',
-    grade: 'B',
-    score: 71,
-    jobs: 9,
+    role: 'Plumber',
+    grade: 'B+',
+    score: 74,
+    jobs: 19,
+    verified: false,
     gradeColor: '#6366F1',
-    img: 'https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?w=400&h=300&fit=crop',
+    img: 'https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?w=400&h=400&fit=crop&crop=face',
   },
   {
-    name: 'Taiwo A.',
-    role: 'Cable Laying',
-    grade: 'C',
-    score: 63,
-    jobs: 5,
-    gradeColor: '#F59E0B',
-    img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=300&fit=crop',
+    name: 'Adaeze M.',
+    role: 'Security Guard',
+    grade: 'B',
+    score: 68,
+    jobs: 12,
+    verified: false,
+    gradeColor: '#6366F1',
+    img: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face',
   },
 ]
 
@@ -232,30 +240,34 @@ export default function Demo() {
                     {/* Worker cards grid */}
                     <div className="grid grid-cols-3 gap-3">
                       {WORKERS.map((w) => (
-                        <div key={w.name} className="rounded-xl overflow-hidden border border-white/6 hover:border-indigo-500/30 transition-colors group" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                          <div className="relative h-20 overflow-hidden">
+                        <div key={w.name} className="rounded-xl overflow-hidden border border-white/8 hover:border-indigo-500/40 transition-all duration-300 group" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                          <div className="relative h-28 overflow-hidden">
                             <img
                               src={w.img}
                               alt={w.name}
-                              className="w-full h-full object-cover object-top opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500"
+                              className="w-full h-full object-cover object-center opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                             />
-                            <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(14,21,37,0.95))' }} />
+                            <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 30%, rgba(10,16,30,0.97))' }} />
+                            {/* Trust grade badge */}
                             <div
-                              className="absolute top-2 right-2 text-[10px] font-black px-1.5 py-0.5 rounded-md"
+                              className="absolute top-2 right-2 text-[11px] font-black px-2 py-0.5 rounded-lg shadow-lg"
                               style={{ background: w.gradeColor, color: '#fff' }}
                             >
                               {w.grade}
                             </div>
+                            {/* Verified badge */}
+                            {w.verified && (
+                              <div className="absolute top-2 left-2 flex items-center gap-1 bg-emerald-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md">
+                                ✓ NIN
+                              </div>
+                            )}
                           </div>
-                          <div className="px-2.5 py-2">
-                            <div className="text-white text-[11px] font-semibold flex items-center gap-1">
-                              {w.name}
-                              <span className="text-emerald-400 text-[9px]">✓</span>
-                            </div>
-                            <div className="text-white/35 text-[10px]">{w.role}</div>
+                          <div className="px-2.5 py-2.5">
+                            <div className="text-white text-[11px] font-bold truncate">{w.name}</div>
+                            <div className="text-white/50 text-[10px] truncate">{w.role}</div>
                             <div className="flex items-center justify-between mt-1.5">
-                              <span className="text-[10px] text-white/25">{w.jobs} jobs</span>
-                              <span className="text-[10px] font-bold" style={{ color: w.gradeColor }}>{w.score}</span>
+                              <span className="text-[10px] text-white/30">{w.jobs} jobs</span>
+                              <span className="text-[11px] font-black" style={{ color: w.gradeColor }}>{w.score}</span>
                             </div>
                           </div>
                         </div>

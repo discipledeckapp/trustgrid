@@ -16,9 +16,17 @@ export function WorkerCard({ worker }: { worker: Worker }) {
         <div className="flex items-start gap-4">
           {/* Avatar */}
           <div className="relative shrink-0">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-xl font-black text-blue-700">
-              {worker.firstName[0]}
-            </div>
+            {worker.profilePhotoUrl ? (
+              <img
+                src={worker.profilePhotoUrl}
+                alt={`${worker.firstName} ${worker.lastName}`}
+                className="w-14 h-14 rounded-2xl object-cover border border-gray-100"
+              />
+            ) : (
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-xl font-black text-blue-700">
+                {worker.firstName[0]}
+              </div>
+            )}
             {worker.verificationStatus === 'FULLY_VERIFIED' && (
               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white">
                 <ShieldCheck className="w-2.5 h-2.5 text-white" />
