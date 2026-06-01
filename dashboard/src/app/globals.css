@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── TrustGrid Design Tokens ─────────────────────────────────────────────── */
+
+@layer base {
+  :root {
+    --brand:          #4F46E5;
+    --brand-teal:     #0D9488;
+    --canvas:         #F8FAFC;
+    --surface:        #FFFFFF;
+    --border:         #E2E8F0;
+    --shadow-brand:   0 8px 24px rgba(79,70,229,0.18);
+
+    /* Trust semantic */
+    --verified:       #059669;  --verified-bg:   #D1FAE5;
+    --partial:        #0D9488;  --partial-bg:    #CCFBF1;
+    --endorsed:       #4F46E5;  --endorsed-bg:   #E0E7FF;
+    --pending:        #D97706;  --pending-bg:    #FEF3C7;
+    --unverified:     #64748B;  --unverified-bg: #F1F5F9;
+    --incident:       #E11D48;  --incident-bg:   #FFE4E6;
+  }
+}
+
+@layer base {
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+  body { background-color: var(--canvas); color: #0F172A; }
+}
+
+/* ─── Trust Ring ─────────────────────────────────────────────────────────── */
+@layer components {
+  .trust-ring { position: relative; display: inline-flex; }
+  .trust-ring::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 9999px;
+    border: 2.5px solid var(--ring-color, #64748B);
+    pointer-events: none;
+  }
+  .ring-aplus { --ring-color: #059669; }
+  .ring-a     { --ring-color: #0D9488; }
+  .ring-bplus { --ring-color: #4F46E5; }
+  .ring-b     { --ring-color: #7C3AED; }
+  .ring-c     { --ring-color: #D97706; }
+  .ring-d     { --ring-color: #EA580C; }
+  .ring-f     { --ring-color: #DC2626; }
+  
+  @keyframes ring-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.3; transform: scale(1.1); }
+  }
+  .ring-pulse::after {
+    animation: ring-pulse 2.5s cubic-bezier(.4,0,.6,1) infinite;
+  }
+}
+
+/* ─── Passport Header ────────────────────────────────────────────────────── */
+@layer components {
+  .passport-header {
+    background: linear-gradient(135deg, #4F46E5 0%, #0D9488 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .passport-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.06) 1px, transparent 0);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+}
+
+/* ─── Gradient text ──────────────────────────────────────────────────────── */
+@layer utilities {
+  .text-brand-gradient {
+    background: linear-gradient(135deg, #4F46E5 0%, #06B6D4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .bg-brand-gradient {
+    background: linear-gradient(135deg, #4F46E5 0%, #06B6D4 100%);
+  }
+  .shadow-brand {
+    box-shadow: 0 8px 24px rgba(79,70,229,0.18);
+  }
+}
+
+/* ─── Face Stack (endorsement avatars) ──────────────────────────────────── */
+@layer components {
+  .face-stack { display: flex; flex-direction: row; align-items: center; }
+  .face-stack .face { width: 28px; height: 28px; border-radius: 9999px; border: 2px solid white; margin-left: -8px; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .face-stack .face:first-child { margin-left: 0; }
+}
+
+/* ─── Trust Timeline ─────────────────────────────────────────────────────── */
+@layer components {
+  .trust-timeline { position: relative; }
+  .trust-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: linear-gradient(to bottom, #4F46E5, #0D9488);
+    opacity: 0.15;
+  }
+  .trust-timeline-item { position: relative; padding-left: 40px; padding-bottom: 20px; }
+  .trust-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 9px; top: 4px;
+    width: 12px; height: 12px;
+    border-radius: 9999px;
+    background: #4F46E5;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #4F46E5;
+  }
+  .trust-timeline-item.positive::before { background: #059669; box-shadow: 0 0 0 2px #059669; }
+  .trust-timeline-item.negative::before { background: #E11D48; box-shadow: 0 0 0 2px #E11D48; }
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }

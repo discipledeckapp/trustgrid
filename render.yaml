@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: trustgrid-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && node dist/main
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRY
+        value: 15m
+      - key: JWT_REFRESH_EXPIRY
+        value: 7d
+      - key: IDENTITY_ADAPTER
+        value: MOCK
+      - key: DATABASE_URL
+        sync: false   # paste Neon connection string in Render dashboard

@@ -1,0 +1,149 @@
+<!--
+  TrustGrid Network G — Brand Mark
+  Concept A: The "G" constructed from network nodes and bezier connections.
+
+  The G is formed by 10 outer arc nodes connected by smooth curves,
+  with an inner horizontal bar of 3 nodes.
+  The "opening" of the G (characteristic negative space) is intentionally open —
+  representing an accessible community, not a closed system.
+
+  The gradient from Indigo (#4F46E5) to Cyan (#06B6D4) communicates:
+  Authority + Credibility (Indigo) → Community + Openness (Cyan/Teal)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <!-- Primary brand gradient -->
+    <linearGradient id="brand-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <!-- Subtle glow filter for premium feel -->
+    <filter id="node-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!--
+    THE NETWORK G
+
+    Construction: The G letterform is traced by connecting 10 arc nodes
+    (outer circle minus the top-right gap that creates the G opening)
+    plus 3 horizontal bar nodes.
+
+    Arc nodes positioned on a circle of radius ~42px centered at (50,50):
+    Starting from upper-left, going clockwise, stopping before top-right gap.
+  -->
+
+  <!-- ── Connection paths (drawn before nodes so nodes sit on top) ──────── -->
+
+  <!-- Outer arc: lower-left going counterclockwise (the G body) -->
+  <!-- From N10 (upper-left) sweeping down through left, bottom, right, up to mid-right -->
+  <path
+    d="
+      M 21 26
+      C 21 26, 12 38, 12 50
+      C 12 62, 16 72, 24 80
+      C 32 88, 42 92, 52 92
+      C 62 92, 72 88, 80 80
+      C 88 72, 90 62, 90 50
+    "
+    stroke="url(#brand-gradient)"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- Inner spur connection (right mid → inner bar start) -->
+  <path
+    d="M 90 50 L 52 50"
+    stroke="url(#brand-gradient)"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- Inner horizontal bar (bar right portion) -->
+  <path
+    d="M 52 50 L 76 50"
+    stroke="url(#brand-gradient)"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- Left side upper arc (N10 up toward top-left area) -->
+  <path
+    d="M 21 26 C 28 16, 40 10, 52 10"
+    stroke="url(#brand-gradient)"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    fill="none"
+    opacity="0.6"
+  />
+
+  <!-- Subtle secondary network connections (mini trust graph inside G counter) -->
+  <path
+    d="M 52 50 C 54 38, 62 34, 66 30"
+    stroke="url(#brand-gradient)"
+    stroke-width="1.2"
+    stroke-linecap="round"
+    stroke-dasharray="2 3"
+    fill="none"
+    opacity="0.4"
+  />
+  <path
+    d="M 64 50 C 64 44, 68 40, 66 30"
+    stroke="url(#brand-gradient)"
+    stroke-width="1.2"
+    stroke-linecap="round"
+    stroke-dasharray="2 3"
+    fill="none"
+    opacity="0.4"
+  />
+  <!-- Tiny node at junction of secondary connections -->
+  <circle cx="66" cy="30" r="2.5" fill="url(#brand-gradient)" opacity="0.5"/>
+
+  <!-- ── Primary arc nodes ──────────────────────────────────────────────── -->
+  <!--
+    These are the "people" or "trust participants" in the network.
+    Positioned at key junctions of the G arc.
+  -->
+
+  <!-- N10: upper-left start of G arc -->
+  <circle cx="21" cy="26" r="3.5" fill="url(#brand-gradient)"/>
+
+  <!-- N9: left mid-upper -->
+  <circle cx="12" cy="50" r="3" fill="url(#brand-gradient)"/>
+
+  <!-- N8: lower-left -->
+  <circle cx="24" cy="80" r="3" fill="url(#brand-gradient)"/>
+
+  <!-- N7: bottom -->
+  <circle cx="52" cy="92" r="3.5" fill="url(#brand-gradient)"/>
+
+  <!-- N6: lower-right -->
+  <circle cx="80" cy="80" r="3" fill="url(#brand-gradient)"/>
+
+  <!-- N5: right mid (end of G arc = junction to bar) -->
+  <circle cx="90" cy="50" r="3.5" fill="url(#brand-gradient)"/>
+
+  <!-- N10 partial: top start (slightly faded = G opening) -->
+  <circle cx="52" cy="10" r="3" fill="url(#brand-gradient)" opacity="0.6"/>
+
+  <!-- ── Inner bar nodes ────────────────────────────────────────────────── -->
+  <!-- These represent the institution or anchor of trust -->
+
+  <!-- N11: bar left (junction with arc = the spur) -->
+  <circle cx="52" cy="50" r="4" fill="url(#brand-gradient)"/>
+
+  <!-- N12: bar mid -->
+  <circle cx="64" cy="50" r="3" fill="url(#brand-gradient)"/>
+
+  <!-- N13: bar right end -->
+  <circle cx="76" cy="50" r="3.5" fill="url(#brand-gradient)"/>
+
+</svg>
