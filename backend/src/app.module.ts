@@ -23,6 +23,7 @@ import { VolunteersModule } from './modules/volunteers/volunteers.module'
 import { AnalyticsModule } from './modules/analytics/analytics.module'
 import { BlacklistModule } from './modules/blacklist/blacklist.module'
 import { CatalogModule } from './modules/catalog/catalog.module'
+import { BillingModule } from './modules/billing/billing.module'
 import { ConfigModule as AppConfigModule } from './modules/config/config.module'
 import { OnboardingModule } from './modules/onboarding/onboarding.module'
 import { pinoLoggerConfig } from './common/logger/logger.config'
@@ -64,6 +65,7 @@ import { pinoLoggerConfig } from './common/logger/logger.config'
     VendorsModule,
     BlacklistModule,
     CatalogModule,
+    BillingModule,
     VolunteersModule,
     AnalyticsModule,
     AppConfigModule,
