@@ -173,6 +173,30 @@ function randomBetween(min: number, max: number): number {
   return Math.random() * (max - min) + min;
 }
 
+// Realistic diverse Nigerian professional photos from Unsplash (public domain)
+const WORKER_PHOTOS = [
+  'https://images.unsplash.com/photo-1531384441138-2736e62e0919?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1546961342-ea5f62d0e9fc?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1583864697784-a0efc8379f70?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1504257432389-52343af06ae3?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1580489944761-15a19d674916?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1521119989659-a83eee488004?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?w=200&h=200&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&h=200&fit=crop&crop=face',
+]
+
 function generatePhone(): string {
   const prefixes = ['0803', '0806', '0813', '0816', '0701', '0706', '0813', '0907'];
   const prefix = randomElement(prefixes);
@@ -297,6 +321,8 @@ async function seed() {
       ? randomElement(ELECTRICIAN_SKILLS)
       : randomElement(GENERAL_SKILLS);
 
+    const photoUrl = WORKER_PHOTOS[i % WORKER_PHOTOS.length]
+
     const user = await prisma.userAccount.create({
       data: {
         institutionId: institution.id,
@@ -304,6 +330,7 @@ async function seed() {
         lastName,
         phone: generatePhone(),
         role: 'WORKER',
+        profilePhotoUrl: photoUrl,
       },
     });
 
