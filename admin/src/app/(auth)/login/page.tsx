@@ -5,24 +5,24 @@ import { api, saveAdminAuth } from '@/lib/api'
 
 function NetworkGMark({ size = 32 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
       <defs>
         <linearGradient id="admin-login-g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%"   stopColor="#4F46E5"/>
-          <stop offset="100%" stopColor="#06B6D4"/>
+          <stop offset="0%"   stopColor="#a5b4fc"/>
+          <stop offset="100%" stopColor="#67e8f9"/>
         </linearGradient>
       </defs>
       <path d="M 21 26 C 12 38, 12 62, 24 80 C 32 88, 42 92, 52 92 C 62 92, 72 88, 80 80 C 88 72, 90 62, 90 50"
-        stroke="url(#admin-login-g)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+        stroke="url(#admin-login-g)" strokeWidth="5" strokeLinecap="round" fill="none"/>
       <path d="M 21 26 C 28 16, 40 10, 52 10"
-        stroke="url(#admin-login-g)" strokeWidth="3.5" strokeLinecap="round" fill="none" opacity="0.5"/>
+        stroke="url(#admin-login-g)" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.5"/>
       <path d="M 90 50 L 52 50 L 76 50"
-        stroke="url(#admin-login-g)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
-      <circle cx="21" cy="26" r="4"   fill="url(#admin-login-g)"/>
-      <circle cx="52" cy="92" r="4"   fill="url(#admin-login-g)"/>
-      <circle cx="90" cy="50" r="4.5" fill="url(#admin-login-g)"/>
-      <circle cx="52" cy="50" r="5"   fill="url(#admin-login-g)"/>
-      <circle cx="76" cy="50" r="3.5" fill="url(#admin-login-g)"/>
+        stroke="url(#admin-login-g)" strokeWidth="5" strokeLinecap="round" fill="none"/>
+      <circle cx="21" cy="26" r="5"   fill="url(#admin-login-g)"/>
+      <circle cx="52" cy="92" r="5"   fill="url(#admin-login-g)"/>
+      <circle cx="90" cy="50" r="5.5" fill="url(#admin-login-g)"/>
+      <circle cx="52" cy="50" r="6"   fill="url(#admin-login-g)"/>
+      <circle cx="76" cy="50" r="4.5" fill="url(#admin-login-g)"/>
     </svg>
   )
 }
@@ -40,10 +40,13 @@ export default function AdminLoginPage() {
     setError('')
     try {
       const { data } = await api.post('/auth/login', { identifier, password })
+      if (data.user.role !== 'PLATFORM_ADMIN') {
+        throw new Error('Platform admin access required')
+      }
       saveAdminAuth(data.tokens.accessToken)
       router.push('/dashboard')
     } catch {
-      setError('Invalid credentials.')
+      setError('Invalid credentials or account is not a platform admin.')
     } finally {
       setLoading(false)
     }

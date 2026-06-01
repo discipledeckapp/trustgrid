@@ -4,26 +4,46 @@ import { useRouter } from 'next/navigation'
 import { useBrand } from '@/hooks/useBrand'
 import { api, saveAuth } from '@/lib/api'
 
+// White version — for dark backgrounds (mobile header, left panel)
+function NetworkGMarkWhite({ size = 32 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
+      <path d="M 21 26 C 12 38, 12 62, 24 80 C 32 88, 42 92, 52 92 C 62 92, 72 88, 80 80 C 88 72, 90 62, 90 50"
+        stroke="white" strokeWidth="5" strokeLinecap="round" fill="none"/>
+      <path d="M 21 26 C 28 16, 40 10, 52 10"
+        stroke="white" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.55"/>
+      <path d="M 90 50 L 52 50 L 76 50"
+        stroke="white" strokeWidth="5" strokeLinecap="round" fill="none"/>
+      <circle cx="21" cy="26" r="5"   fill="white"/>
+      <circle cx="52" cy="92" r="5"   fill="white"/>
+      <circle cx="90" cy="50" r="5.5" fill="white"/>
+      <circle cx="52" cy="50" r="6"   fill="white"/>
+      <circle cx="76" cy="50" r="4.5" fill="white"/>
+    </svg>
+  )
+}
+
+// Gradient version — for light backgrounds (sidebar, etc.)
 function NetworkGMark({ size = 32 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
       <defs>
         <linearGradient id="dash-login-g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%"   stopColor="#4F46E5"/>
-          <stop offset="100%" stopColor="#06B6D4"/>
+          <stop offset="0%"   stopColor="#a5b4fc"/>
+          <stop offset="100%" stopColor="#67e8f9"/>
         </linearGradient>
       </defs>
       <path d="M 21 26 C 12 38, 12 62, 24 80 C 32 88, 42 92, 52 92 C 62 92, 72 88, 80 80 C 88 72, 90 62, 90 50"
-        stroke="url(#dash-login-g)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+        stroke="url(#dash-login-g)" strokeWidth="5" strokeLinecap="round" fill="none"/>
       <path d="M 21 26 C 28 16, 40 10, 52 10"
-        stroke="url(#dash-login-g)" strokeWidth="3.5" strokeLinecap="round" fill="none" opacity="0.5"/>
+        stroke="url(#dash-login-g)" strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.5"/>
       <path d="M 90 50 L 52 50 L 76 50"
-        stroke="url(#dash-login-g)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
-      <circle cx="21" cy="26" r="4"   fill="url(#dash-login-g)"/>
-      <circle cx="52" cy="92" r="4"   fill="url(#dash-login-g)"/>
-      <circle cx="90" cy="50" r="4.5" fill="url(#dash-login-g)"/>
-      <circle cx="52" cy="50" r="5"   fill="url(#dash-login-g)"/>
-      <circle cx="76" cy="50" r="3.5" fill="url(#dash-login-g)"/>
+        stroke="url(#dash-login-g)" strokeWidth="5" strokeLinecap="round" fill="none"/>
+      <circle cx="21" cy="26" r="5"   fill="url(#dash-login-g)"/>
+      <circle cx="52" cy="92" r="5"   fill="url(#dash-login-g)"/>
+      <circle cx="90" cy="50" r="5.5" fill="url(#dash-login-g)"/>
+      <circle cx="52" cy="50" r="6"   fill="url(#dash-login-g)"/>
+      <circle cx="76" cy="50" r="4.5" fill="url(#dash-login-g)"/>
     </svg>
   )
 }
@@ -64,8 +84,8 @@ export default function LoginPage() {
       {/* Left side — community brand story */}
       <div className="hidden lg:flex flex-col justify-between w-1/2 p-16">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)' }}>
-            <NetworkGMark size={32} />
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.12)' }}>
+            <NetworkGMarkWhite size={26} />
           </div>
           <span className="font-black text-lg text-white">TrustGrid</span>
         </div>
@@ -89,8 +109,9 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Logo — mobile only */}
           <div className="text-center mb-8 lg:hidden">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.1)' }}>
-              <NetworkGMark size={48} />
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)' }}>
+              <NetworkGMarkWhite size={42} />
             </div>
             <h1 className="text-2xl font-bold text-white">{found ? communityName : 'TrustGrid'}</h1>
             <p className="text-white/50 text-sm mt-1">Governance Dashboard</p>
