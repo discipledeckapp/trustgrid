@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../services/api_client.dart';
 import '../../config/theme.dart';
+import '../../features/community/community_provider.dart';
+import '../../widgets/network_g_logo.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -66,6 +68,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final brand = ref.watch(effectiveBrandProvider);
     return Scaffold(
       backgroundColor: TrustGridColors.surface,
       body: Center(
@@ -82,15 +85,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: TrustGridColors.primary,
-                    borderRadius: BorderRadius.circular(16),
+                    color: brand.found
+                        ? brand.primaryColor.withValues(alpha: 0.15)
+                        : const Color(0xFF1e1b4b),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: brand.found
+                          ? brand.primaryColor.withValues(alpha: 0.3)
+                          : Colors.white12,
+                    ),
                   ),
-                  child: const Icon(Icons.verified_user, color: Colors.white, size: 36),
+                  child: Center(
+                    child: NetworkGLogo(
+                      size: 44,
+                      primaryColor: brand.found
+                          ? brand.primaryColor
+                          : const Color(0xFF4F46E5),
+                      accentColor: brand.found
+                          ? brand.accentColor
+                          : const Color(0xFF06B6D4),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'TrustGrid',
-                  style: TextStyle(
+                Text(
+                  brand.found ? brand.displayName : 'TrustGrid',
+                  style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: TrustGridColors.textPrimary,
@@ -98,7 +118,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Trusted People. Accountable Service.',
+                  'Sign in to continue',
                   style: TextStyle(color: TrustGridColors.textSecondary, fontSize: 14),
                 ),
                 const SizedBox(height: 40),
@@ -163,6 +183,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: _loading ? null : _login,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: brand.found
+                                  ? brand.primaryColor
+                                  : TrustGridColors.primary,
+                            ),
                             child: _loading
                                 ? const SizedBox(
                                     height: 20,

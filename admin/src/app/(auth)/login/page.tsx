@@ -1,13 +1,36 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Shield } from 'lucide-react'
 import { api, saveAdminAuth } from '@/lib/api'
+
+function NetworkGMark({ size = 32 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="admin-login-g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#4F46E5"/>
+          <stop offset="100%" stopColor="#06B6D4"/>
+        </linearGradient>
+      </defs>
+      <path d="M 21 26 C 12 38, 12 62, 24 80 C 32 88, 42 92, 52 92 C 62 92, 72 88, 80 80 C 88 72, 90 62, 90 50"
+        stroke="url(#admin-login-g)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+      <path d="M 21 26 C 28 16, 40 10, 52 10"
+        stroke="url(#admin-login-g)" strokeWidth="3.5" strokeLinecap="round" fill="none" opacity="0.5"/>
+      <path d="M 90 50 L 52 50 L 76 50"
+        stroke="url(#admin-login-g)" strokeWidth="3.5" strokeLinecap="round" fill="none"/>
+      <circle cx="21" cy="26" r="4"   fill="url(#admin-login-g)"/>
+      <circle cx="52" cy="92" r="4"   fill="url(#admin-login-g)"/>
+      <circle cx="90" cy="50" r="4.5" fill="url(#admin-login-g)"/>
+      <circle cx="52" cy="50" r="5"   fill="url(#admin-login-g)"/>
+      <circle cx="76" cy="50" r="3.5" fill="url(#admin-login-g)"/>
+    </svg>
+  )
+}
 
 export default function AdminLoginPage() {
   const router = useRouter()
-  const [phone, setPhone] = useState('08001234567')
-  const [password, setPassword] = useState('Admin123!')
+  const [identifier, setIdentifier] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -16,9 +39,7 @@ export default function AdminLoginPage() {
     setLoading(true)
     setError('')
     try {
-      // For demo: use the seeded institution admin. In prod, PLATFORM_ADMIN
-      // would have a separate account and platform-aware authentication.
-      const { data } = await api.post('/auth/login', { identifier: phone, password })
+      const { data } = await api.post('/auth/login', { identifier, password })
       saveAdminAuth(data.tokens.accessToken)
       router.push('/dashboard')
     } catch {
@@ -29,37 +50,72 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6" style={{ background: '#020617' }}>
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
-            <Shield className="w-7 h-7 text-white" />
+
+        {/* Logo block */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-16 h-16 bg-indigo-950 rounded-2xl flex items-center justify-center mb-4 border border-indigo-900">
+            <NetworkGMark size={48} />
           </div>
-          <h1 className="text-xl font-bold text-white">TrustGrid</h1>
-          <p className="text-slate-400 text-sm mt-1">Super Admin Console</p>
+          <h1 className="text-white font-black text-2xl tracking-tight">TrustGrid</h1>
+          <p className="text-indigo-400 text-xs font-semibold mt-1 tracking-widest uppercase font-mono">
+            Platform Administration
+          </p>
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm text-slate-300 mb-1.5">Phone</label>
-              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-white/40"
-                required />
-            </div>
-            <div>
-              <label className="block text-sm text-slate-300 mb-1.5">Password</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)}
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-white/40"
-                required />
-            </div>
-            {error && <p className="text-red-400 text-xs">{error}</p>}
-            <button type="submit" disabled={loading}
-              className="w-full bg-white text-slate-900 py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-100 disabled:opacity-60 transition-colors">
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-        </div>
+        {/* Separator */}
+        <div className="border-t border-slate-800 mb-8" />
+
+        {/* Form — no card, fields directly on dark bg */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-slate-400 text-xs uppercase tracking-widest font-semibold mb-2">
+              Email or Phone
+            </label>
+            <input
+              type="text"
+              value={identifier}
+              onChange={e => setIdentifier(e.target.value)}
+              placeholder="admin@trustgrid.ng"
+              autoComplete="username"
+              className="w-full bg-slate-900 border border-slate-700 text-white rounded-lg px-4 py-3 focus:border-indigo-500 focus:outline-none placeholder:text-slate-600 text-sm"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-slate-400 text-xs uppercase tracking-widest font-semibold mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••••••"
+              autoComplete="current-password"
+              className="w-full bg-slate-900 border border-slate-700 text-white rounded-lg px-4 py-3 focus:border-indigo-500 focus:outline-none placeholder:text-slate-600 text-sm"
+              required
+            />
+          </div>
+
+          {error && (
+            <p className="text-red-500 text-xs">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-bold py-3 rounded-lg transition-colors text-sm tracking-wide"
+          >
+            {loading ? 'Authenticating...' : 'Sign In'}
+          </button>
+        </form>
+
+        {/* Disclaimer */}
+        <p className="text-slate-700 text-xs text-center mt-10">
+          Restricted access · Authorised personnel only
+        </p>
       </div>
     </div>
   )
