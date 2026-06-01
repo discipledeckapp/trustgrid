@@ -7,6 +7,8 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { IdentityService, InitiateVerificationDto, CACVerifyDto } from './identity.service'
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard'
 import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator'
+import { Roles } from '../../common/decorators/roles.decorator'
+import { RolesGuard } from '../../common/guards/roles.guard'
 
 @ApiTags('Identity Verification')
 @Controller('identity')
@@ -24,7 +26,7 @@ export class IdentityController {
   // ── Protected ─────────────────────────────────────────────────────────────
 
   @Post('liveness/create-session')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a Rekognition Face Liveness session (Pathway 1 — returns sessionId for frontend)' })
   createLivenessSession() {
@@ -51,7 +53,9 @@ export class IdentityController {
     @Body() body: { photoBase64: string },
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.identityService.uploadWorkerPhoto(workerId, user.institutionId, body.photoBase64)
+    return this.identityService.uploadWorkerPhoto(
+      workerId, user.institutionId, body.photoBase64, user.sub, user.role,
+    )
   }
 
   @Post('workers/:workerId/verify')
@@ -73,7 +77,9 @@ In all cases, the live photo is stored encrypted on the worker profile.
     @Body() dto: InitiateVerificationDto,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.identityService.initiateVerification(workerId, user.institutionId, dto)
+    return this.identityService.initiateVerification(
+      workerId, user.institutionId, dto, user.sub, user.role,
+    )
   }
 
   @Get('workers/:workerId/status')
@@ -115,14 +121,15 @@ In all cases, the live photo is stored encrypted on the worker profile.
     @CurrentUser() user: CurrentUserPayload,
   ) {
     const photo = await this.identityService.getWorkerPhoto(
-      workerId, user.institutionId, user.role,
+      workerId, user.institutionId, user.role, user.sub,
     )
     if (!photo) return { photo: null, hasPhoto: false }
     return { photo, hasPhoto: true }
   }
 
   @Post('organisations/:organisationId/verify-cac')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'ORGANISATION_ADMIN')
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
 import { CacheService } from '../../common/redis/cache.service'
 
@@ -73,6 +73,10 @@ export class InstitutionsService {
     institutionId: string,
     data: { firstName: string; lastName: string; phone: string; email?: string; role: string },
   ) {
+    if (!['INSTITUTION_OPERATOR', 'INSTITUTION_VIEWER'].includes(data.role)) {
+      throw new BadRequestException('Operator role must be INSTITUTION_OPERATOR or INSTITUTION_VIEWER')
+    }
+
     return this.prisma.userAccount.create({
       data: {
         institutionId,

@@ -6,7 +6,116 @@
 import { PrismaClient, WorkerType, InstitutionType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
+
+// ── Full Service Catalog — Upwork-style hierarchy ──────────────────────────
+// Structure: Domain → Category → Skills/Specialisations
+// Covers: Artisans, Professionals, Healthcare, Creative, Technical, Management
+// Platform admin can extend this via the admin catalog management UI
+
+const FULL_SERVICE_CATALOG = [
+  // ── TECHNICAL / TRADES ───────────────────────────────────────────────────
+  { id: 'cat_electrical', name: 'Electrical', domain: 'Technical & Trades', icon: 'bolt', color: '#F59E0B', defaultMinTrustScore: 60,
+    skills: ['Electrician','Solar Installation','Panel Wiring','Generator Maintenance','Industrial Wiring','Stage Lighting','Low Voltage Systems','Smart Home Installation'],
+    requiresCertification: ['COREN','Trade Licence'],
+    workerTypes: ['CONTRACTOR','FREELANCER'] },
+  { id: 'cat_plumbing', name: 'Plumbing', domain: 'Technical & Trades', icon: 'droplets', color: '#3B82F6', defaultMinTrustScore: 55,
+    skills: ['Plumber','Pipe Fitting','Borehole Services','Drainage','Sanitary Installation','Water Treatment'],
+    requiresCertification: ['Trade Licence'],
+    workerTypes: ['CONTRACTOR','FREELANCER'] },
+  { id: 'cat_hvac', name: 'HVAC & Cooling', domain: 'Technical & Trades', icon: 'wind', color: '#06B6D4', defaultMinTrustScore: 60,
+    skills: ['AC Technician','Refrigeration','Ventilation Systems','Chiller Maintenance','Split Unit Installation'],
+    requiresCertification: ['Trade Licence'],
+    workerTypes: ['CONTRACTOR','FREELANCER'] },
+  { id: 'cat_construction', name: 'Construction & Civil', domain: 'Technical & Trades', icon: 'hard-hat', color: '#92400E', defaultMinTrustScore: 55,
+    skills: ['Builder','Bricklayer','Carpenter','Welder','Steel Fixer','Tiling','Painting & Decoration','Roofing'],
+    requiresCertification: ['COREN (Civil)','Site Safety Card'],
+    workerTypes: ['CONTRACTOR','EMPLOYEE'] },
+  { id: 'cat_it_support', name: 'IT & Technology', domain: 'Technical & Trades', icon: 'monitor', color: '#4F46E5', defaultMinTrustScore: 60,
+    skills: ['IT Support','Network Engineer','CCTV Installation','Server Administrator','Software Developer','Web Developer','Cybersecurity','Data Analyst'],
+    requiresCertification: [],
+    workerTypes: ['CONTRACTOR','FREELANCER'] },
+
+  // ── PROFESSIONAL SERVICES ────────────────────────────────────────────────
+  { id: 'cat_legal', name: 'Legal & Compliance', domain: 'Professional Services', icon: 'scale', color: '#7C3AED', defaultMinTrustScore: 75,
+    skills: ['Corporate Lawyer','Employment Lawyer','Property Lawyer','Litigation','Contract Review','Compliance Officer','Legal Secretary','Notary'],
+    requiresCertification: ['NBA Membership','SAN (Senior Advocate)'],
+    workerTypes: ['CONTRACTOR','FREELANCER'] },
+  { id: 'cat_finance', name: 'Finance & Accounting', domain: 'Professional Services', icon: 'calculator', color: '#0D9488', defaultMinTrustScore: 75,
+    skills: ['Accountant','Auditor','Financial Analyst','Tax Consultant','Bookkeeper','Payroll Manager','CFO Services','Investment Advisor'],
+    requiresCertification: ['ICAN','ACCA','CFA'],
+    workerTypes: ['CONTRACTOR','FREELANCER'] },
+  { id: 'cat_engineering', name: 'Engineering & Design', domain: 'Professional Services', icon: 'settings', color: '#DC2626', defaultMinTrustScore: 70,
+    skills: ['Civil Engineer','Structural Engineer','Mechanical Engineer','Electrical Engineer','Architect','Interior Designer','Urban Planner','Quantity Surveyor'],
+    requiresCertification: ['COREN','NIA','NIOB'],
+    workerTypes: ['CONTRACTOR','FREELANCER'] },
+  { id: 'cat_consulting', name: 'Management & Consulting', domain: 'Professional Services', icon: 'briefcase', color: '#059669', defaultMinTrustScore: 70,
+    skills: ['Strategy Consultant','HR Consultant','Project Manager','Business Analyst','Change Manager','Operations Manager','Training & Development'],
+    requiresCertification: [],
+    workerTypes: ['CONTRACTOR','FREELANCER'] },
+  { id: 'cat_communications', name: 'Communications & PR', domain: 'Professional Services', icon: 'megaphone', color: '#F97316', defaultMinTrustScore: 60,
+    skills: ['Communications Manager','PR Specialist','Brand Strategist','Social Media Manager','Journalist','Copywriter','Translator','Interpreter'],
+    requiresCertification: [],
+    workerTypes: ['CONTRACTOR','FREELANCER'] },
+
+  // ── HEALTHCARE & WELLNESS ────────────────────────────────────────────────
+  { id: 'cat_medical', name: 'Medical & Clinical', domain: 'Healthcare & Wellness', icon: 'heart-pulse', color: '#EF4444', defaultMinTrustScore: 85,
+    skills: ['Medical Doctor','Nurse','Pharmacist','Physiotherapist','Dentist','Laboratory Scientist','Radiographer','Paramedic'],
+    requiresCertification: ['MDCN','NMCN','PCN'],
+    workerTypes: ['CONTRACTOR','VOLUNTEER'] },
+  { id: 'cat_welfare', name: 'Welfare & Social Care', domain: 'Healthcare & Wellness', icon: 'heart', color: '#EC4899', defaultMinTrustScore: 65,
+    skills: ['Social Worker','Counsellor','Child Welfare Officer','Disability Support','Elderly Care','Mental Health Volunteer'],
+    requiresCertification: [],
+    workerTypes: ['VOLUNTEER','EMPLOYEE'] },
+  { id: 'cat_fitness', name: 'Fitness & Wellness', domain: 'Healthcare & Wellness', icon: 'activity', color: '#10B981', defaultMinTrustScore: 55,
+    skills: ['Fitness Instructor','Personal Trainer','Nutritionist','Yoga Instructor','Sports Coach'],
+    requiresCertification: [],
+    workerTypes: ['CONTRACTOR','FREELANCER'] },
+
+  // ── SECURITY & SAFETY ────────────────────────────────────────────────────
+  { id: 'cat_security', name: 'Security Services', domain: 'Security & Safety', icon: 'shield', color: '#6366F1', defaultMinTrustScore: 75,
+    skills: ['Security Guard','Access Control Officer','Crowd Controller','CCTV Operator','Security Supervisor','Armed Guard','Fire Safety Officer'],
+    requiresCertification: ['NSCDC Certification','PSC Licence'],
+    workerTypes: ['CONTRACTOR','EMPLOYEE'] },
+
+  // ── EVENTS & HOSPITALITY ─────────────────────────────────────────────────
+  { id: 'cat_events', name: 'Events & Hospitality', domain: 'Events & Hospitality', icon: 'calendar', color: '#8B5CF6', defaultMinTrustScore: 50,
+    skills: ['Event Manager','Stage Manager','Event Decorator','AV Technician','MC/Host','Protocol Officer','Usher','Event Photographer','Videographer'],
+    requiresCertification: [],
+    workerTypes: ['CONTRACTOR','FREELANCER'] },
+  { id: 'cat_catering', name: 'Catering & Food Services', domain: 'Events & Hospitality', icon: 'utensils', color: '#F59E0B', defaultMinTrustScore: 50,
+    skills: ['Chef','Caterer','Baker','Bartender','Waiter/Waitress','Food Safety Officer'],
+    requiresCertification: ['NAFDAC Food Handler'],
+    workerTypes: ['CONTRACTOR','FREELANCER'] },
+
+  // ── TRANSPORT & LOGISTICS ────────────────────────────────────────────────
+  { id: 'cat_transport', name: 'Transport & Logistics', domain: 'Transport & Logistics', icon: 'truck', color: '#0EA5E9', defaultMinTrustScore: 65,
+    skills: ['Driver','Dispatch Rider','Truck Driver','Logistics Coordinator','Cargo Handler','Courier'],
+    requiresCertification: ["Driver's Licence"],
+    workerTypes: ['CONTRACTOR','EMPLOYEE'] },
+
+  // ── FACILITY & CLEANING ──────────────────────────────────────────────────
+  { id: 'cat_cleaning', name: 'Cleaning & Facility', domain: 'Facility Management', icon: 'sparkles', color: '#10B981', defaultMinTrustScore: 45,
+    skills: ['Cleaner','Housekeeper','Laundry Worker','Gardener/Landscaper','Pest Control','Waste Management','Pool Attendant'],
+    requiresCertification: [],
+    workerTypes: ['CONTRACTOR','EMPLOYEE'] },
+  { id: 'cat_domestic', name: 'Domestic Services', domain: 'Facility Management', icon: 'home', color: '#6B7280', defaultMinTrustScore: 50,
+    skills: ['House Manager','Domestic Staff','Cook','Nanny/Au Pair','Personal Assistant','Driver-PA'],
+    requiresCertification: [],
+    workerTypes: ['EMPLOYEE','CONTRACTOR'] },
+
+  // ── EDUCATION & TRAINING ─────────────────────────────────────────────────
+  { id: 'cat_education', name: 'Education & Training', domain: 'Education', icon: 'book', color: '#F59E0B', defaultMinTrustScore: 65,
+    skills: ['Teacher','Tutor','Corporate Trainer','Skills Instructor','Music Teacher','Language Tutor','Exam Prep Specialist'],
+    requiresCertification: ['Teaching Qualification','TRCN'],
+    workerTypes: ['CONTRACTOR','FREELANCER','EMPLOYEE'] },
+
+  // ── GENERAL ─────────────────────────────────────────────────────────────
+  { id: 'cat_general', name: 'General Labour', domain: 'General', icon: 'wrench', color: '#6B7280', defaultMinTrustScore: 40,
+    skills: ['General Labour','Loading & Offloading','Site Worker','Errand Person'],
+    requiresCertification: [],
+    workerTypes: ['CONTRACTOR'] },
+]
 
 const NIGERIAN_FIRST_NAMES = [
   'Chukwuemeka', 'Adewale', 'Oluwaseun', 'Emeka', 'Tunde', 'Segun',
@@ -62,6 +171,12 @@ async function seed() {
   console.log('🌱 Seeding TrustGrid demo data...');
 
   // Clean up — order matters due to FK constraints (children before parents)
+  await prisma.onboardingApplication.deleteMany();
+  await prisma.organisationWorker.deleteMany();
+  await prisma.organisationDocument.deleteMany();
+  await prisma.organisationBranch.deleteMany();
+  await prisma.organisation.deleteMany();
+  await prisma.volunteerProfile.deleteMany();
   await prisma.incidentResolution.deleteMany();
   await prisma.incidentNote.deleteMany();
   await prisma.assignmentWorker.deleteMany();
@@ -120,13 +235,7 @@ async function seed() {
           },
           minimumTrustScore: 60,
           requireIdentityVerification: true,
-          serviceCategories: [
-            { id: 'cat_electrical', name: 'Electrical', icon: 'bolt', color: '#F59E0B', defaultMinTrustScore: 60 },
-            { id: 'cat_event', name: 'Event Services', icon: 'calendar', color: '#8B5CF6', defaultMinTrustScore: 45 },
-            { id: 'cat_security', name: 'Security', icon: 'shield', color: '#6366F1', defaultMinTrustScore: 70 },
-            { id: 'cat_medical', name: 'Medical', icon: 'heart-pulse', color: '#EF4444', defaultMinTrustScore: 75 },
-            { id: 'cat_general', name: 'General Labour', icon: 'wrench', color: '#6B7280', defaultMinTrustScore: 40 },
-          ],
+          serviceCategories: FULL_SERVICE_CATALOG,
         },
       },
     },
@@ -336,10 +445,126 @@ async function seed() {
 
   console.log(`✓ Created service request: ${serviceRequest.title}`);
 
+  // ── Seed all demo user types ────────────────────────────────────────────────
+
+  // 1. Worker user — Chukwuemeka (can log in to worker app)
+  const workerUserAccount = await prisma.userAccount.create({
+    data: {
+      institutionId: institution.id,
+      firstName: 'Chukwuemeka',
+      lastName: 'Adeyemi',
+      phone: '08001234570',
+      email: 'chukwuemeka@demo.com',
+      role: 'WORKER',
+      passwordHash,
+      phoneVerified: true,
+    },
+  })
+  // Link to a top-scoring worker profile
+  const topWorker = workerProfiles[0]
+  await prisma.workerProfile.update({
+    where: { id: topWorker.id },
+    data: { userId: workerUserAccount.id },
+  }).catch(() => {}) // skip if already linked
+
+  // 2. Resident user — can request services
+  await prisma.userAccount.create({
+    data: {
+      institutionId: institution.id,
+      firstName: 'Funke',
+      lastName: 'Adeola',
+      phone: '08001234571',
+      email: 'funke@resident.com',
+      role: 'RESIDENT',
+      passwordHash,
+      phoneVerified: true,
+    },
+  })
+
+  // 3. Professional worker — Corporate Lawyer (shows non-artisan category)
+  const lawyerUser = await prisma.userAccount.create({
+    data: {
+      institutionId: institution.id,
+      firstName: 'Ngozi',
+      lastName: 'Okafor',
+      phone: '08001234572',
+      email: 'ngozi.okafor@legalaid.com',
+      role: 'WORKER',
+      passwordHash,
+      phoneVerified: true,
+    },
+  })
+  await prisma.workerProfile.create({
+    data: {
+      institutionId: institution.id,
+      userId: lawyerUser.id,
+      primarySkill: 'Corporate Lawyer',
+      skills: ['Corporate Law', 'Contract Review', 'Employment Law', 'Dispute Resolution'],
+      categoryIds: ['cat_legal'],
+      workerType: 'CONTRACTOR',
+      yearsExperience: 12,
+      bio: 'Qualified barrister and solicitor. Specialises in corporate governance, employment law, and institutional compliance.',
+      hourlyRate: 25000,
+      dailyRate: 120000,
+      verificationStatus: 'FULLY_VERIFIED',
+      trustScore: 88.5,
+      trustScoreUpdatedAt: new Date(),
+      totalDeployments: 8,
+      completedDeployments: 8,
+      averageRating: 4.9,
+      totalEndorsements: 4,
+      isAvailable: true,
+    },
+  })
+
+  // 4. Organisation seed — Emeka Electrical Services Ltd
+  const orgAdmin = await prisma.userAccount.create({
+    data: {
+      institutionId: institution.id,
+      firstName: 'Emeka',
+      lastName: 'Obi',
+      phone: '08001234573',
+      email: 'emeka.obi@emekaelectrical.ng',
+      role: 'ORGANISATION_ADMIN',
+      passwordHash,
+      phoneVerified: true,
+    },
+  })
+  await prisma.organisation.create({
+    data: {
+      institutionId: institution.id,
+      name: 'Emeka Electrical Services Ltd',
+      slug: `emeka-electrical-${Date.now()}`,
+      type: 'OTHER',
+      rcNumber: 'RC1234567',
+      phone: '08001234573',
+      email: 'info@emekaelectrical.ng',
+      address: '14 Ikeja Industrial Estate, Lagos',
+      serviceCategories: ['Electrical', 'Solar Installation', 'Generator Maintenance'],
+      verificationStatus: 'PARTIALLY_VERIFIED',
+      onboardingStatus: 'ACTIVE',
+      trustScore: 72.0,
+      totalContracts: 15,
+      completedContracts: 14,
+      averageRating: 4.7,
+      isActive: true,
+      adminUserId: orgAdmin.id,
+    },
+  })
+
+  console.log('✓ Created all demo user types')
+
   console.log('\n✅ Demo seed complete!\n');
   console.log('📋 Demo Data Summary:');
   console.log(`   Institution: ${institution.name}`);
-  console.log(`   Admin login: phone=08001234567 password=Admin123!`);
+  console.log('');
+  console.log('👥 ALL USER TYPE CREDENTIALS (password: Admin123! for all):');
+  console.log('   INSTITUTION_ADMIN:    08001234567  (Deacon Emeka — full access)');
+  console.log('   INSTITUTION_OPERATOR: 08001234568  (Sister Adaeze — day-to-day ops)');
+  console.log('   WORKER (artisan):     08001234570  (Chukwuemeka — electrician, A+ grade)');
+  console.log('   WORKER (professional):08001234572  (Ngozi — corporate lawyer)');
+  console.log('   ORGANISATION_ADMIN:   08001234573  (Emeka Obi — Emeka Electrical Ltd)');
+  console.log('   RESIDENT:             08001234571  (Funke Adeola — community member)');
   console.log(`   Institution ID: ${institution.id}`);
   console.log(`   Workers seeded: ${workerProfiles.length}`);
   console.log(`     - Electricians: 48`);

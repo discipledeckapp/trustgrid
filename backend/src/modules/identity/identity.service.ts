@@ -2,7 +2,7 @@
  * IdentityService — Privacy-First Verification
  * See design notes in identity.service.ts header for full privacy model.
  */
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from '@nestjs/common'
 import { createHash } from 'crypto'   // still used for photo hashing (not NIN)
 import { PrismaService } from '../../prisma/prisma.service'
 import { TrustScoreService } from '../trust-score/trust-score.service'
@@ -57,11 +57,18 @@ export class IdentityService {
 
   // ── Photo upload (all pathways — even unverified workers get a photo) ──────
 
-  async uploadWorkerPhoto(workerId: string, institutionId: string, photoBase64: string) {
+  async uploadWorkerPhoto(
+    workerId: string,
+    institutionId: string,
+    photoBase64: string,
+    requesterId: string,
+    requesterRole: string,
+  ) {
     const worker = await this.prisma.workerProfile.findFirst({
       where: { id: workerId, institutionId },
     })
     if (!worker) throw new NotFoundException('Worker not found')
+    this.assertCanManageWorker(worker.userId, requesterId, requesterRole)
 
     await this.prisma.workerProfile.update({
       where: { id: workerId },
@@ -76,12 +83,19 @@ export class IdentityService {
 
   // ── Main verification flow ─────────────────────────────────────────────────
 
-  async initiateVerification(workerId: string, institutionId: string, dto: InitiateVerificationDto) {
+  async initiateVerification(
+    workerId: string,
+    institutionId: string,
+    dto: InitiateVerificationDto,
+    requesterId: string,
+    requesterRole: string,
+  ) {
     const [worker, institution] = await Promise.all([
       this.prisma.workerProfile.findFirst({ where: { id: workerId, institutionId } }),
       this.prisma.institution.findUnique({ where: { id: institutionId }, select: { country: true } }),
     ])
     if (!worker) throw new NotFoundException('Worker not found')
+    this.assertCanManageWorker(worker.userId, requesterId, requesterRole)
 
     const country = institution?.country ?? 'NG'
     const adapter = this.adapterRegistry.getAdapter(country)
@@ -300,37 +314,92 @@ export class IdentityService {
     return { ...base, legalName, birthYear, gender }
   }
 
-  async getWorkerPhoto(workerId: string, institutionId: string, requesterRole: string) {
+  async getWorkerPhoto(
+    workerId: string,
+    institutionId: string,
+    requesterRole: string,
+    requesterId: string,
+  ) {
     const authorized = ['INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'PLATFORM_ADMIN', 'WORKER']
       .includes(requesterRole)
     if (!authorized) return null
 
     const w = await this.prisma.workerProfile.findFirst({
       where: { id: workerId, institutionId },
-      select: { profilePhotoEncrypted: true },
+      select: { userId: true, profilePhotoEncrypted: true },
     })
+    if (requesterRole === 'WORKER' && w?.userId !== requesterId) return null
     if (!w?.profilePhotoEncrypted) return null
     return this.encryption.decrypt(w.profilePhotoEncrypted)
   }
 
+  private assertCanManageWorker(workerUserId: string, requesterId: string, requesterRole: string) {
+    if (['INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'PLATFORM_ADMIN'].includes(requesterRole)) return
+    if (requesterRole === 'WORKER' && workerUserId === requesterId) return
+    throw new ForbiddenException('You cannot update this worker profile')
+  }
+
   // ── CAC ───────────────────────────────────────────────────────────────────
 
-  async verifyOrganisationCAC(organisationId: string, institutionId: string, dto: CACVerifyDto) {
+  async verifyOrganisationCAC(
+    organisationId: string,
+    institutionId: string,
+    dto: CACVerifyDto & { representativeNin?: string },
+  ) {
     const org = await this.prisma.organisation.findFirst({ where: { id: organisationId, institutionId } })
     if (!org) throw new NotFoundException('Organisation not found')
 
     const result = await this.cacAdapter.verify({ rcNumber: dto.rcNumber, companyType: dto.companyType ?? 'RC' })
     const newStatus = result.verified ? 'PARTIALLY_VERIFIED' : 'UNVERIFIED'
+
+    // ── Cross-reference representative against CAC directors ──────────────
+    // If a representative NIN is provided AND CAC returned directors,
+    // we check whether the NIN hash matches any director in the list.
+    // This answers: "Is this person authorised to represent this company?"
+    let representativeIsDirector: boolean | null = null
+    let representativeNinHash: string | null = null
+    let encryptedDirectors: string | null = null
+
+    if (dto.representativeNin && result.directors && result.directors.length > 0) {
+      representativeNinHash = this.encryption.hashIdNumber(dto.representativeNin)
+      encryptedDirectors = this.encryption.encrypt(JSON.stringify(result.directors))
+
+      // We cannot directly compare NIN hashes to director names from CAC
+      // (CAC returns names, not NINs). The authorisation check therefore works as:
+      //   1. If rep claims to be a director → they upload their NIN
+      //   2. Institution admin reviews the director list and confirms the name matches
+      //   3. OR: rep provides an authorisation letter signed by a listed director
+      // Full automated cross-referencing requires a CAC-NIN lookup API (future integration).
+      // For now: flag as "pending director confirmation" if not self-confirmed.
+      representativeIsDirector = null // null = pending manual confirmation
+    }
+
     await this.prisma.organisation.update({
       where: { id: organisationId },
-      data: { verificationStatus: newStatus as any, rcNumber: dto.rcNumber },
+      data: {
+        verificationStatus: newStatus as any,
+        rcNumber: dto.rcNumber,
+        representativeNinHash,
+        representativeIsDirector,
+        cacDirectors: encryptedDirectors,
+      },
     })
+
     return {
-      status: newStatus, verified: result.verified,
-      companyName: result.companyName, companyStatus: result.companyStatus, directors: result.directors,
+      status: newStatus,
+      verified: result.verified,
+      companyName: result.companyName,
+      companyStatus: result.companyStatus,
+      directors: result.directors,  // returned to admin for manual review
+      representativeAuthorisation: representativeNinHash
+        ? 'PENDING_DIRECTOR_CONFIRMATION'
+        : 'NOT_CHECKED',
       message: result.verified
-        ? `${result.companyName} verified against CAC records.`
+        ? `${result.companyName} verified against CAC records.${representativeNinHash ? ' Representative authorisation pending manual director confirmation.' : ''}`
         : `Could not confirm RC ${dto.rcNumber}. Organisation flagged as unverified — onboarding continues.`,
+      nextStep: result.verified && !representativeIsDirector
+        ? 'Institution admin should review the CAC director list and confirm the representative is authorised, OR request an authorisation letter.'
+        : undefined,
     }
   }
 

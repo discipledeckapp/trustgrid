@@ -14,10 +14,12 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ServiceRequestsService, CreateServiceRequestDto } from './service-requests.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
 
 @ApiTags('Service Requests')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('service-requests')
 
 export class ServiceRequestsController {
@@ -40,7 +42,14 @@ export class ServiceRequestsController {
     @Query('limit') limit: number,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.serviceRequestsService.list(user.institutionId, status, Number(page) || 1, Number(limit) || 20);
+    return this.serviceRequestsService.list(
+      user.institutionId,
+      status,
+      Number(page) || 1,
+      Number(limit) || 20,
+      user.sub,
+      user.role,
+    );
   }
 
   @Get(':id')
@@ -49,7 +58,7 @@ export class ServiceRequestsController {
     @Param('id') id: string,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.serviceRequestsService.getById(id, user.institutionId);
+    return this.serviceRequestsService.getById(id, user.institutionId, user.sub, user.role);
   }
 
   @Post(':id/submit')
@@ -72,6 +81,7 @@ export class ServiceRequestsController {
   }
 
   @Post(':id/assign')
+  @Roles('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Assign workers to this service request' })
   async assignWorkers(
@@ -88,6 +98,7 @@ export class ServiceRequestsController {
   }
 
   @Post(':id/complete')
+  @Roles('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mark a service request as completed' })
   async complete(
@@ -99,6 +110,7 @@ export class ServiceRequestsController {
   }
 
   @Post('mobilise')
+  @Roles('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Emergency mobilisation — instantly find available verified workers and create urgent request',

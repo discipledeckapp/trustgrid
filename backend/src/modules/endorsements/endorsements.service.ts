@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TrustScoreService } from '../trust-score/trust-score.service';
 
@@ -82,11 +82,20 @@ export class EndorsementsService {
     });
   }
 
-  async revokeEndorsement(endorsementId: string, institutionId: string, revokedBy: string, reason?: string) {
+  async revokeEndorsement(
+    endorsementId: string,
+    institutionId: string,
+    revokedBy: string,
+    requesterRole: string,
+    reason?: string,
+  ) {
     const endorsement = await this.prisma.endorsement.findFirst({
       where: { id: endorsementId, institutionId, isActive: true },
     });
     if (!endorsement) throw new NotFoundException('Endorsement not found');
+    const canRevoke = endorsement.endorsedById === revokedBy ||
+      ['INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR'].includes(requesterRole);
+    if (!canRevoke) throw new ForbiddenException('You cannot revoke this endorsement');
 
     await this.prisma.endorsement.update({
       where: { id: endorsementId },

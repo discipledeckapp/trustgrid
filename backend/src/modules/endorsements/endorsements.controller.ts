@@ -58,6 +58,7 @@ export class EndorsementsController {
       endorsementId,
       user.institutionId,
       user.sub,
+      user.role,
       body.reason,
     );
   }

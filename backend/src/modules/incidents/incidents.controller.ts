@@ -14,10 +14,12 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { IncidentsService, CreateIncidentDto, ResolveIncidentDto } from './incidents.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
 
 @ApiTags('Incidents')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('incidents')
 
 export class IncidentsController {
@@ -53,6 +55,7 @@ export class IncidentsController {
   }
 
   @Post(':id/resolve')
+  @Roles('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Resolve an incident' })
   async resolve(
@@ -64,6 +67,7 @@ export class IncidentsController {
   }
 
   @Post(':id/notes')
+  @Roles('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR')
   @ApiOperation({ summary: 'Add a note to an incident' })
   async addNote(
     @Param('id') id: string,

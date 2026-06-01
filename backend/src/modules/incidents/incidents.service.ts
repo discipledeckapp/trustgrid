@@ -26,6 +26,24 @@ export class IncidentsService {
   ) {}
 
   async create(dto: CreateIncidentDto, institutionId: string, reportedById: string) {
+    if (!dto.workerId && !dto.vendorId) {
+      throw new BadRequestException('An incident must reference a worker or vendor');
+    }
+
+    if (dto.workerId) {
+      const worker = await this.prisma.workerProfile.findFirst({
+        where: { id: dto.workerId, institutionId },
+      });
+      if (!worker) throw new NotFoundException('Worker not found');
+    }
+
+    if (dto.vendorId) {
+      const vendor = await this.prisma.vendorProfile.findFirst({
+        where: { id: dto.vendorId, institutionId },
+      });
+      if (!vendor) throw new NotFoundException('Vendor not found');
+    }
+
     const incident = await this.prisma.incidentReport.create({
       data: {
         institutionId,

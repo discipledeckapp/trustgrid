@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common'
 import { PrismaService } from '../../prisma/prisma.service'
 import { TrustScoreService } from '../trust-score/trust-score.service'
+import { EncryptionService } from '../../common/encryption/encryption.service'
 
 // ─── Step DTOs ────────────────────────────────────────────────────────────────
 
@@ -76,6 +77,7 @@ export class OnboardingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly trustScoreService: TrustScoreService,
+    private readonly encryption: EncryptionService,
   ) {}
 
   // ── Individual Worker Flow ──────────────────────────────────────────────────
@@ -142,7 +144,15 @@ export class OnboardingService {
       where: { id: dto.applicationId },
       data: {
         stepCompleted: 3,
-        formData: { ...existing, step3: { idType: dto.idType, idNumber: dto.idNumber, status: 'PENDING' } },
+        formData: {
+          ...existing,
+          step3: {
+            idType: dto.idType,
+            idNumberEncrypted: this.encryption.encrypt(dto.idNumber),
+            idNumberHash: this.encryption.hashIdNumber(dto.idNumber),
+            status: 'PENDING',
+          },
+        },
       },
     })
 
@@ -347,7 +357,7 @@ export class OnboardingService {
         bio: step2.bio,
         serviceZoneIds: step5.serviceZoneIds ?? [],
         availabilityNotes: step5.availabilityNotes,
-        verificationStatus: 'PARTIALLY_VERIFIED',
+        verificationStatus: 'UNVERIFIED',
       },
     })
 

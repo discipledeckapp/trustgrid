@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   ConflictException,
   NotFoundException,
@@ -129,7 +130,12 @@ export class WorkforceService {
     };
   }
 
-  async getWorkerById(workerId: string, institutionId: string) {
+  async getWorkerById(
+    workerId: string,
+    institutionId: string,
+    requesterId?: string,
+    requesterRole?: string,
+  ) {
     const worker = await this.prisma.workerProfile.findFirst({
       where: { id: workerId, institutionId },
       include: {
@@ -166,13 +172,16 @@ export class WorkforceService {
     if (!worker) throw new NotFoundException('Worker not found');
 
     const gradeInfo = this.trustScoreService.getGrade(worker.trustScore);
+    const canViewContact = !requesterRole ||
+      ['INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'PLATFORM_ADMIN'].includes(requesterRole) ||
+      worker.userId === requesterId;
 
     return {
       id: worker.id,
       firstName: worker.user.firstName,
       lastName: worker.user.lastName,
-      phone: worker.user.phone,
-      email: worker.user.email,
+      phone: canViewContact ? worker.user.phone : undefined,
+      email: canViewContact ? worker.user.email : undefined,
       profilePhotoUrl: worker.user.profilePhotoUrl,
       primarySkill: worker.primarySkill,
       skills: worker.skills,
@@ -210,11 +219,20 @@ export class WorkforceService {
     };
   }
 
-  async updateAvailability(workerId: string, institutionId: string, isAvailable: boolean) {
+  async updateAvailability(
+    workerId: string,
+    institutionId: string,
+    isAvailable: boolean,
+    requesterId: string,
+    requesterRole: string,
+  ) {
     const worker = await this.prisma.workerProfile.findFirst({
       where: { id: workerId, institutionId },
     });
     if (!worker) throw new NotFoundException('Worker not found');
+    if (requesterRole === 'WORKER' && worker.userId !== requesterId) {
+      throw new ForbiddenException('Workers can only update their own availability');
+    }
 
     return this.prisma.workerProfile.update({
       where: { id: workerId },
@@ -233,14 +251,18 @@ export class WorkforceService {
       institutionId,
       isActive: true,
       isAvailable: true,
+      verificationStatus: 'FULLY_VERIFIED',
       trustScore: { gte: minTrustScore },
-      OR: requiredSkills.map(skill => ({
+    };
+
+    if (requiredSkills.length > 0) {
+      where.OR = requiredSkills.map(skill => ({
         OR: [
           { primarySkill: { contains: skill, mode: 'insensitive' } },
           { skills: { has: skill } },
         ],
-      })),
-    };
+      }))
+    }
 
     if (categoryId) {
       where.categoryIds = { has: categoryId };

@@ -3,16 +3,19 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { VendorsService, CreateVendorDto } from './vendors.service'
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard'
 import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator'
+import { Roles } from '../../common/decorators/roles.decorator'
+import { RolesGuard } from '../../common/guards/roles.guard'
 
 @ApiTags('Vendors')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('vendors')
 
 export class VendorsController {
   constructor(private readonly vendorsService: VendorsService) {}
 
   @Post()
+  @Roles('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR')
   @ApiOperation({ summary: 'Register a vendor' })
   async create(@Body() dto: CreateVendorDto, @CurrentUser() user: CurrentUserPayload) {
     return this.vendorsService.create(dto, user.institutionId)
@@ -43,6 +46,7 @@ export class VendorsController {
   }
 
   @Patch(':id/preferred')
+  @Roles('INSTITUTION_ADMIN')
   @ApiOperation({ summary: 'Mark/unmark vendor as preferred' })
   async setPreferred(
     @Param('id') id: string,
@@ -53,6 +57,7 @@ export class VendorsController {
   }
 
   @Post(':id/blacklist')
+  @Roles('INSTITUTION_ADMIN')
   @ApiOperation({ summary: 'Blacklist a vendor' })
   async blacklist(
     @Param('id') id: string,

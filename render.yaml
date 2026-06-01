@@ -5,20 +5,68 @@ services:
     rootDir: backend
     buildCommand: npm install --include=dev && npx prisma generate && npm run build
     startCommand: npx prisma migrate deploy && node dist/main
+    healthCheckPath: /api/v1/health/ping
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 3000
       - key: NODE_VERSION
         value: "20"
+      - key: PORT
+        value: 3000
+
+      # ── Auth ───────────────────────────────────────────────────────────
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_ACCESS_EXPIRY
         value: 15m
       - key: JWT_REFRESH_EXPIRY
         value: 7d
-      - key: IDENTITY_ADAPTER
-        value: MOCK
+
+      # ── Database ───────────────────────────────────────────────────────
+      # Paste your Neon PostgreSQL connection string in Render dashboard
       - key: DATABASE_URL
-        sync: false   # paste Neon connection string in Render dashboard
+        sync: false
+
+      # ── Redis (Upstash) ────────────────────────────────────────────────
+      # Paste Upstash Redis URL (rediss://...) in Render dashboard
+      - key: REDIS_URL
+        sync: false
+
+      # ── Encryption & Privacy ───────────────────────────────────────────
+      # Generate: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: ID_HASH_SECRET
+        sync: false
+
+      # ── Identity Verification ──────────────────────────────────────────
+      - key: IDENTITY_ADAPTER
+        value: LIVE
+      - key: PREMBLY_API_KEY
+        sync: false
+      - key: PREMBLY_APP_ID
+        sync: false
+
+      # ── Notifications ─────────────────────────────────────────────────
+      - key: TERMII_API_KEY
+        sync: false
+      - key: TERMII_SENDER_ID
+        value: TrustGrid
+      - key: TERMII_WHATSAPP_SENDER
+        value: TrustGrid
+
+      # ── Observability ─────────────────────────────────────────────────
+      - key: SENTRY_DSN
+        sync: false
+
+      # ── CORS ──────────────────────────────────────────────────────────
+      - key: CORS_ORIGINS
+        value: https://trustgrid.ng,https://app.trustgrid.ng,https://admin.trustgrid.ng
+
+      # ── AWS Rekognition (optional — liveness detection) ───────────────
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        value: eu-west-1

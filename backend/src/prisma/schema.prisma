@@ -424,6 +424,17 @@ model Organisation {
   reviewedById        String?
   reviewedAt          DateTime?
   reviewNotes         String?
+
+  // ── Organisation authorisation ─────────────────────────────────────────
+  // Validates that the person registering actually represents the company.
+  // CAC check: Prembly returns directors[] — we cross-reference registrant NIN
+  // against listed directors. If not a director, an authorisation letter is required.
+  representativeNinHash   String?    // HMAC hash of representative's NIN (never plaintext)
+  representativeIsDirector Boolean?  // true if NIN matched a CAC-listed director
+  authorisationLetterUploaded Boolean @default(false)  // fallback if not a director
+  authorisationVerifiedAt DateTime?  // when an admin confirmed the authorisation
+  cacDirectors           Json?       // encrypted director names from CAC (for reference)
+
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 

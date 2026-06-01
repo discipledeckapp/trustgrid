@@ -59,9 +59,17 @@ export class ServiceRequestsService {
     return { ...request, matchedWorkers: matched.length };
   }
 
-  async list(institutionId: string, status?: string, page = 1, limit = 20) {
+  async list(
+    institutionId: string,
+    status?: string,
+    page = 1,
+    limit = 20,
+    requesterId?: string,
+    requesterRole?: string,
+  ) {
     const where: any = { institutionId };
     if (status) where.status = status;
+    if (requesterRole === 'RESIDENT') where.requesterId = requesterId;
 
     const [requests, total] = await Promise.all([
       this.prisma.serviceRequest.findMany({
@@ -79,9 +87,12 @@ export class ServiceRequestsService {
     };
   }
 
-  async getById(id: string, institutionId: string) {
+  async getById(id: string, institutionId: string, requesterId?: string, requesterRole?: string) {
+    const where: any = { id, institutionId };
+    if (requesterRole === 'RESIDENT') where.requesterId = requesterId;
+
     const request = await this.prisma.serviceRequest.findFirst({
-      where: { id, institutionId },
+      where,
       include: {
         assignment: {
           include: {
@@ -141,6 +152,29 @@ export class ServiceRequestsService {
       throw new BadRequestException('Request must be submitted before assigning workers');
     }
 
+    const uniqueWorkerIds = [...new Set(workerIds)]
+    if (uniqueWorkerIds.length === 0) {
+      throw new BadRequestException('Select at least one worker')
+    }
+    if (uniqueWorkerIds.length > request.workersNeeded) {
+      throw new BadRequestException(`This request needs at most ${request.workersNeeded} workers`)
+    }
+
+    const matchedWorkers = await this.workforceService.findMatchingWorkers(
+      institutionId,
+      request.requiredSkills,
+      request.minimumTrustScore ?? 0,
+      request.title.startsWith('EMERGENCY:') ? undefined : request.categoryId,
+      10_000,
+    )
+    const matchedIds = new Set(matchedWorkers.map((worker) => worker.id))
+    const invalidWorkerIds = uniqueWorkerIds.filter((workerId) => !matchedIds.has(workerId))
+    if (invalidWorkerIds.length > 0) {
+      throw new BadRequestException(
+        'Every assigned worker must belong to this institution and satisfy the request verification, availability, skill, category, and trust requirements',
+      )
+    }
+
     const assignment = await this.prisma.workforceAssignment.create({
       data: {
         institutionId,
@@ -149,7 +183,7 @@ export class ServiceRequestsService {
         assignedById,
         status: 'PENDING_ACCEPTANCE',
         assignmentWorkers: {
-          create: workerIds.map((workerId, idx) => ({
+          create: uniqueWorkerIds.map((workerId, idx) => ({
             workerId,
             role: idx === 0 ? 'LEAD' : 'WORKER',
             status: 'PENDING_ACCEPTANCE',
@@ -202,7 +236,11 @@ export class ServiceRequestsService {
     workersNeeded?: number
     urgency?: 'NORMAL' | 'HIGH' | 'CRITICAL'
   }, institutionId: string, requesterId: string) {
-    const minScore = dto.minimumTrustScore ?? 50
+    const config = await this.prisma.institutionConfig.findUnique({
+      where: { institutionId },
+      select: { minimumTrustScore: true },
+    })
+    const minScore = dto.minimumTrustScore ?? config?.minimumTrustScore ?? 50
     const needed   = dto.workersNeeded ?? 3
 
     // Find matching workers immediately

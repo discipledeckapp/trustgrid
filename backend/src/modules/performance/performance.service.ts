@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TrustScoreService } from '../trust-score/trust-score.service';
 
@@ -20,7 +20,62 @@ export class PerformanceService {
     private readonly trustScoreService: TrustScoreService,
   ) {}
 
-  async submitReview(dto: CreatePerformanceReviewDto, institutionId: string, reviewedById: string) {
+  async submitReview(
+    dto: CreatePerformanceReviewDto,
+    institutionId: string,
+    reviewedById: string,
+    reviewerRole: string,
+  ) {
+    if (!dto.serviceRequestId) {
+      throw new BadRequestException('A performance review must reference a completed service request');
+    }
+    if (dto.overallRating < 1 || dto.overallRating > 5) {
+      throw new BadRequestException('Overall rating must be between 1 and 5');
+    }
+
+    const request = await this.prisma.serviceRequest.findFirst({
+      where: { id: dto.serviceRequestId, institutionId },
+      include: {
+        assignment: {
+          include: { assignmentWorkers: true },
+        },
+      },
+    });
+    if (!request) throw new NotFoundException('Service request not found');
+    if (request.status !== 'COMPLETED') {
+      throw new BadRequestException('Only completed service requests can be reviewed');
+    }
+    if (reviewerRole === 'RESIDENT' && request.requesterId !== reviewedById) {
+      throw new ForbiddenException('Residents can only review their own service requests');
+    }
+
+    if (dto.workerId) {
+      const worker = await this.prisma.workerProfile.findFirst({
+        where: { id: dto.workerId, institutionId },
+      });
+      if (!worker) throw new NotFoundException('Worker not found');
+      const wasAssigned = request.assignment?.assignmentWorkers.some((aw) => aw.workerId === dto.workerId);
+      if (!wasAssigned) throw new BadRequestException('Worker was not assigned to this service request');
+    }
+
+    if (dto.vendorId) {
+      const vendor = await this.prisma.vendorProfile.findFirst({
+        where: { id: dto.vendorId, institutionId },
+      });
+      if (!vendor) throw new NotFoundException('Vendor not found');
+    }
+
+    const existing = await this.prisma.performanceReview.findFirst({
+      where: {
+        institutionId,
+        reviewedById,
+        serviceRequestId: dto.serviceRequestId,
+        workerId: dto.workerId ?? null,
+        vendorId: dto.vendorId ?? null,
+      },
+    });
+    if (existing) throw new ConflictException('You have already reviewed this work');
+
     const review = await this.prisma.performanceReview.create({
       data: {
         institutionId,
@@ -37,16 +92,6 @@ export class PerformanceService {
     });
 
     if (dto.workerId) {
-      // Update deployment stats
-      await this.prisma.workerProfile.update({
-        where: { id: dto.workerId },
-        data: {
-          totalDeployments: { increment: 1 },
-          completedDeployments: { increment: 1 },
-          lastActiveAt: new Date(),
-        },
-      });
-
       // Recompute average rating
       const reviews = await this.prisma.performanceReview.findMany({
         where: { workerId: dto.workerId, institutionId },
@@ -59,16 +104,6 @@ export class PerformanceService {
       await this.prisma.workerProfile.update({
         where: { id: dto.workerId },
         data: { averageRating: Math.round(avgRating * 10) / 10 },
-      });
-
-      // Emit trust events: deployment completed + rating
-      await this.trustScoreService.emitEvent({
-        type: 'DEPLOYMENT_COMPLETED',
-        workerId: dto.workerId,
-        institutionId,
-        referenceType: 'performance_review',
-        referenceId: review.id,
-        createdBy: reviewedById,
       });
 
       await this.trustScoreService.emitEvent({

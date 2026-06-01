@@ -16,6 +16,8 @@ import {
 } from './onboarding.service'
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard'
 import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator'
+import { Roles } from '../../common/decorators/roles.decorator'
+import { RolesGuard } from '../../common/guards/roles.guard'
 
 // Public endpoints (no auth required for self-registration)
 @ApiTags('Onboarding')
@@ -119,7 +121,8 @@ export class OnboardingController {
   // ── Admin review (requires auth) ─────────────────────────────────────────────
 
   @Get('applications')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'PLATFORM_ADMIN')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'List onboarding applications (institution admin)' })
   async listApplications(
@@ -133,7 +136,8 @@ export class OnboardingController {
   }
 
   @Post('applications/:id/review')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('INSTITUTION_ADMIN', 'PLATFORM_ADMIN')
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Approve, reject, or request more info on an application' })

@@ -16,16 +16,19 @@ import { WorkforceService } from './workforce.service';
 import { CreateWorkerDto, WorkerFilterDto } from './dto/create-worker.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
 
 @ApiTags('Workforce Registry')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('workers')
 
 export class WorkforceController {
   constructor(private readonly workforceService: WorkforceService) {}
 
   @Post()
+  @Roles('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR')
   @ApiOperation({ summary: 'Onboard a new worker to the institution registry' })
   async createWorker(
     @Body() dto: CreateWorkerDto,
@@ -49,10 +52,11 @@ export class WorkforceController {
     @Param('id') id: string,
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.workforceService.getWorkerById(id, user.institutionId);
+    return this.workforceService.getWorkerById(id, user.institutionId, user.sub, user.role);
   }
 
   @Patch(':id/availability')
+  @Roles('INSTITUTION_ADMIN', 'INSTITUTION_OPERATOR', 'WORKER')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update worker availability status' })
   async updateAvailability(
@@ -60,7 +64,13 @@ export class WorkforceController {
     @Body() body: { isAvailable: boolean },
     @CurrentUser() user: CurrentUserPayload,
   ) {
-    return this.workforceService.updateAvailability(id, user.institutionId, body.isAvailable);
+    return this.workforceService.updateAvailability(
+      id,
+      user.institutionId,
+      body.isAvailable,
+      user.sub,
+      user.role,
+    );
   }
 
   @Get(':id/matched-requests')
