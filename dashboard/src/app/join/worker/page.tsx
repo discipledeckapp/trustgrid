@@ -1,4 +1,5 @@
 'use client'
+import { Suspense } from 'react'
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { api } from '@/lib/api'
@@ -17,7 +18,7 @@ const SKILLS = ['Electrician','Plumber','Security Guard','Cleaner','General Labo
 const ZONES  = ['Lekki','Victoria Island','Ikoyi','Redemption City','Ajah','Ikeja','Surulere','Yaba','Mainland','Island','Abuja','Port Harcourt']
 const CERTS  = ['Professional Certificate','Trade Licence','COREN Registration','Safety Certificate','Medical Certificate','Manufacturer Certificate']
 
-export default function WorkerOnboardingPage() {
+function WorkerOnboardingInner() {
   const institutionId = useSearchParams().get('i') ?? 'cmpu6vbkr00001lt6vsiiunuo'
   const [step, setStep]           = useState(1)
   const [appId, setAppId]         = useState<string|null>(null)
@@ -251,3 +252,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const iCls = 'w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white transition-shadow'
+
+export default function WorkerOnboardingPage() {
+  return <Suspense fallback={<div className="flex justify-center py-20"><div className="animate-spin w-8 h-8 border-2 border-blue-700 border-t-transparent rounded-full" /></div>}><WorkerOnboardingInner /></Suspense>
+}

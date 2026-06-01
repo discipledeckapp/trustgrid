@@ -1,4 +1,5 @@
 'use client'
+import { Suspense } from 'react'
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { CheckCircle, Building2, Briefcase, FileCheck, Users2, ChevronRight, Plus, Trash2 } from 'lucide-react'
@@ -17,7 +18,7 @@ const SERVICE_CATEGORIES = ['Electrical', 'Plumbing', 'Security', 'Cleaning', 'C
 const ZONES = ['Lekki', 'Victoria Island', 'Ikoyi', 'Redemption City', 'Ajah', 'Ikeja', 'Surulere', 'Mainland', 'Island', 'Abuja', 'Port Harcourt', 'Nationwide']
 const DOC_TYPES = ['CAC Certificate of Incorporation', 'Tax Clearance Certificate', 'Proof of Address', 'Director\'s ID (NIN/Passport)', 'Company Seal Document']
 
-export default function OrgOnboardingPage() {
+function OrgOnboardingInner() {
   const searchParams = useSearchParams()
   const institutionId = searchParams.get('i') ?? 'cmpu5x0p80000nvfshpwx2avg'
 
@@ -336,3 +337,7 @@ function StepFooter({ loading, error, onNext, onBack, nextLabel = 'Continue', is
 }
 
 const inputCls = 'w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white'
+
+export default function OrgOnboardingPage() {
+  return <Suspense fallback={<div className="flex justify-center py-20"><div className="animate-spin w-8 h-8 border-2 border-purple-700 border-t-transparent rounded-full" /></div>}><OrgOnboardingInner /></Suspense>
+}
