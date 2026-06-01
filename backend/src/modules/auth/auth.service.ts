@@ -72,8 +72,15 @@ export class AuthService {
   }
 
   async login(dto: LoginDto, institutionId: string) {
+    const identifier = dto.identifier.trim()
+
+    // Determine if identifier is email or phone
+    const isEmail = identifier.includes('@')
+
     const user = await this.prisma.userAccount.findFirst({
-      where: { phone: dto.phone, institutionId },
+      where: isEmail
+        ? { email: identifier.toLowerCase(), institutionId }
+        : { phone: identifier, institutionId },
     });
 
     if (!user || !user.passwordHash) {
@@ -101,8 +108,11 @@ export class AuthService {
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
         role: user.role,
         institutionId: user.institutionId,
+        profilePhotoUrl: user.profilePhotoUrl,
       },
       tokens,
     };

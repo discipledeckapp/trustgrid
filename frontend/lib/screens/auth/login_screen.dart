@@ -13,7 +13,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _phoneController = TextEditingController(text: '08001234567');
+  final _identifierController = TextEditingController(text: '08001234567');
   final _passwordController = TextEditingController(text: 'Admin123!');
   final _institutionController = TextEditingController();
   bool _loading = false;
@@ -22,7 +22,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   void dispose() {
-    _phoneController.dispose();
+    _identifierController.dispose();
     _passwordController.dispose();
     _institutionController.dispose();
     super.dispose();
@@ -35,7 +35,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final api = ref.read(apiClientProvider);
       final response = await api.post('/auth/login', data: {
-        'phone': _phoneController.text.trim(),
+        'identifier': _identifierController.text.trim(),
         'password': _passwordController.text,
       });
 
@@ -58,7 +58,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         }
       }
     } catch (e) {
-      setState(() { _error = 'Invalid phone or password. Try: 08001234567 / Admin123!'; });
+      setState(() { _error = 'Invalid credentials. Try: 08001234567 or user@example.com / Admin123!'; });
     } finally {
       if (mounted) setState(() { _loading = false; });
     }
@@ -120,12 +120,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 24),
                           TextFormField(
-                            controller: _phoneController,
-                            keyboardType: TextInputType.phone,
+                            controller: _identifierController,
+                            keyboardType: TextInputType.emailAddress,
                             decoration: const InputDecoration(
-                              labelText: 'Phone Number',
-                              prefixIcon: Icon(Icons.phone_outlined),
-                              hintText: '08001234567',
+                              labelText: 'Phone or Email',
+                              prefixIcon: Icon(Icons.person_outline),
+                              hintText: '08001234567 or user@example.com',
                             ),
                             validator: (v) => v?.isEmpty == true ? 'Required' : null,
                           ),
@@ -182,7 +182,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Text(
-                              'Demo credentials:\nPhone: 08001234567\nPassword: Admin123!',
+                              'Demo credentials:\nPhone or Email: 08001234567 or emeka@redemptioncity.ng\nPassword: Admin123!',
                               style: TextStyle(fontSize: 12, color: TrustGridColors.textSecondary),
                             ),
                           ),

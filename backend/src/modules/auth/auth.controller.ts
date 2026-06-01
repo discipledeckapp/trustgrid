@@ -30,7 +30,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Login with phone and password' })
+  @ApiOperation({ summary: 'Login with phone number or email address' })
   @ApiHeader({ name: 'X-Institution-ID', description: 'Institution ID', required: true })
   async login(
     @Body() dto: LoginDto,

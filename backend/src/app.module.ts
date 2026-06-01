@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module'
 import { RedisModule } from './common/redis/redis.module'
 import { HealthModule } from './common/health/health.module'
 import { EncryptionModule } from './common/encryption/encryption.module'
+import { EmailModule } from './common/email/email.module'
 import { QueuesModule } from './modules/queues/queues.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { InstitutionsModule } from './modules/institutions/institutions.module'
@@ -52,6 +53,7 @@ import { pinoLoggerConfig } from './common/logger/logger.config'
     RedisModule,
     HealthModule,
     EncryptionModule,
+    EmailModule,
     QueuesModule,
 
     // Domain modules

@@ -30,7 +30,7 @@ import { api, saveAuth } from '@/lib/api'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [phone, setPhone] = useState('08001234567')
+  const [identifier, setIdentifier] = useState('08001234567')
   const [password, setPassword] = useState('Admin123!')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -41,11 +41,11 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const { data } = await api.post('/auth/login', { phone, password })
+      const { data } = await api.post('/auth/login', { identifier, password })
       saveAuth(data.tokens, data.user.institutionId)
       router.push('/dashboard')
     } catch {
-      setError('Invalid credentials. Use 08001234567 / Admin123! for the demo.')
+      setError('Invalid credentials. Demo: 08001234567 / Admin123!')
     } finally {
       setLoading(false)
     }
@@ -92,11 +92,13 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone or Email</label>
               <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                type="text"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="Phone number or email address"
+                autoComplete="username"
                 className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -131,7 +133,7 @@ export default function LoginPage() {
 
           <div className="mt-4 rounded-xl px-4 py-3 text-xs"
             style={{ background: 'rgba(79,70,229,0.06)', color: '#4F46E5' }}>
-            <strong>Demo credentials:</strong> 08001234567 / Admin123!
+            <strong>Demo:</strong> 08001234567 or emeka@redemptioncity.ng / Admin123!
           </div>
         </div>
       </div>
