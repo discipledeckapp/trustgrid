@@ -4,6 +4,7 @@ import { api } from '@/lib/api'
 import { Shield, ShieldCheck, QrCode, Star, Award, Users, Clock, CheckCircle, XCircle, AlertCircle, ExternalLink, Copy, Download } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
 
 function TrustGrade({ grade, score, label, color }: { grade: string; score: number; label: string; color: string }) {
   const ring = color === 'emerald' ? 'ring-emerald-400 text-emerald-600' :
@@ -166,12 +167,28 @@ export default function PassportPage() {
             <p className="text-[10px] text-indigo-300 uppercase tracking-widest font-bold mb-1">Passport Code</p>
             <p className="text-xl font-mono font-black text-white tracking-widest">{passportCode}</p>
           </div>
-          <div className="flex items-center gap-1 bg-white/10 px-3 py-1.5 rounded-xl">
-            <QrCode className="w-4 h-4 text-indigo-200" />
-            <span className="text-xs text-indigo-200 font-semibold">Scan to Verify</span>
+          <div className="bg-white rounded-xl p-2 shadow-lg">
+            <QRCodeSVG
+              value={verifyUrl ?? `https://verify.trustgrid.ng/${passportCode}`}
+              size={80}
+              level="M"
+              includeMargin={false}
+            />
           </div>
         </div>
       </div>
+
+      {/* Download QR / View verify page */}
+      {verifyUrl && (
+        <div className="flex justify-end mb-4">
+          <button onClick={() => {
+            // Open the verify URL in new tab for now — PDF download is future work
+            window.open(verifyUrl, '_blank')
+          }} className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+            <ExternalLink className="w-3 h-3" /> View public verify page
+          </button>
+        </div>
+      )}
 
       {/* Stats row */}
       {reputation && (

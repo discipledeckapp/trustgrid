@@ -15,6 +15,7 @@ const NAV = [
   { href: '/institutions',   label: 'Institutions',    icon: Building2,       badge: null },
   { href: '/organisations',  label: 'Organisations',   icon: Briefcase,       badge: null },
   { href: '/workers',        label: 'Workers',         icon: Users,           badge: null },
+  { href: '/passports',      label: 'Trust Passports', icon: Shield,          badge: null },
 ]
 
 export function AdminSidebar() {

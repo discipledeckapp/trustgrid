@@ -12,15 +12,19 @@
  *   - Their permanent community record
  */
 'use client'
+import { useState, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, ShieldCheck, Briefcase, ThumbsUp, Star, Calendar, Award, Share2, QrCode, ArrowUpRight } from 'lucide-react'
+import { ArrowLeft, ShieldCheck, Briefcase, ThumbsUp, Star, Award, Share2, ArrowUpRight, Camera, Upload, Loader2, CheckCircle, AlertTriangle } from 'lucide-react'
 import { useWorker, useWorkerTrustScore, useVerifiedDetails, useWorkerPhoto } from '@/hooks/useApi'
 import { TrustGauge } from '@/components/ui/trust-gauge'
 import { VerificationBadge } from '@/components/ui/verification-badge'
 import { FaceStack } from '@/components/ui/face-stack'
 import { CredentialBadge } from '@/components/ui/credential-badge'
+import { LivenessCheck } from '@/components/identity/LivenessCheck'
 import { cn } from '@/lib/utils'
+import { api } from '@/lib/api'
+import { QRCodeSVG } from 'qrcode.react'
 
 const GRADE_RING: Record<string, string> = {
   'A+': 'ring-emerald-500',  'A':  'ring-teal-500',
@@ -38,10 +42,92 @@ const GRADE_TEXT: Record<string, string> = {
 
 export default function TrustPassportPage() {
   const { id } = useParams<{ id: string }>()
-  const { data: worker, isLoading } = useWorker(id)
-  const { data: trust }             = useWorkerTrustScore(id)
-  const { data: identity }          = useVerifiedDetails(id)
-  const { data: photoData }         = useWorkerPhoto(id)
+  const { data: worker, isLoading, refetch } = useWorker(id)
+  const { data: trust }                      = useWorkerTrustScore(id)
+  const { data: identity }                   = useVerifiedDetails(id)
+  const { data: photoData, refetch: refetchPhoto } = useWorkerPhoto(id)
+
+  // ── Verification panel state ───────────────────────────────────────────────
+  const [verifyOpen, setVerifyOpen]   = useState(false)
+  const [verifyMethod, setVerifyMethod] = useState<'selfie' | 'upload'>('selfie')
+
+  // Live-selfie captured data
+  const [livePhotoBase64, setLivePhotoBase64]       = useState<string | null>(null)
+  const [livenessSessionId, setLivenessSessionId]   = useState<string | null>(null)
+
+  // Upload photo state
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploadBase64, setUploadBase64] = useState<string | null>(null)
+
+  // Common verification form state
+  const [idType, setIdType]     = useState('NIN')
+  const [idNumber, setIdNumber] = useState('')
+  const [verifying, setVerifying]   = useState(false)
+  const [verifyError, setVerifyError]   = useState('')
+  const [verifySuccess, setVerifySuccess] = useState(false)
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
+  function handleLivenessCapture(photoBase64: string, sessionId: string | null) {
+    setLivePhotoBase64(photoBase64)
+    setLivenessSessionId(sessionId)
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const result = reader.result as string
+      // Strip the data URL prefix — we only want the raw base64
+      setUploadBase64(result.split(',')[1] ?? null)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  async function submitVerification() {
+    const photoBase64 = verifyMethod === 'selfie' ? livePhotoBase64 : uploadBase64
+    if (!photoBase64) {
+      setVerifyError('Please capture or upload a photo first.')
+      return
+    }
+    if (!idNumber.trim()) {
+      setVerifyError('Please enter your ID number.')
+      return
+    }
+    setVerifying(true)
+    setVerifyError('')
+    try {
+      await api.post(`/identity/workers/${id}/verify`, {
+        idType,
+        idNumber: idNumber.trim(),
+        livePhotoBase64: photoBase64,
+        ...(verifyMethod === 'selfie' && livenessSessionId ? { livenessSessionId } : {}),
+      })
+      setVerifySuccess(true)
+      // Refresh worker data + photo after a short delay
+      setTimeout(() => {
+        refetch()
+        refetchPhoto()
+      }, 1500)
+    } catch (err: any) {
+      setVerifyError(err?.response?.data?.message ?? 'Verification failed. Please try again.')
+    } finally {
+      setVerifying(false)
+    }
+  }
+
+  function resetVerifyPanel() {
+    setVerifyOpen(false)
+    setLivePhotoBase64(null)
+    setLivenessSessionId(null)
+    setUploadBase64(null)
+    setIdNumber('')
+    setVerifyError('')
+    setVerifySuccess(false)
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
 
   if (isLoading) return (
     <div className="flex items-center justify-center min-h-screen bg-canvas">
@@ -63,6 +149,7 @@ export default function TrustPassportPage() {
   const grade     = worker.trustGrade ?? 'F'
   const gradeText = GRADE_TEXT[grade] ?? 'text-slate-600'
   const gradeRing = GRADE_RING[grade] ?? 'ring-slate-300'
+  const isVerified = worker.verificationStatus === 'FULLY_VERIFIED'
 
   // Endorser faces from endorsements data
   const endorserFaces = (worker.endorsements ?? []).map((e: any) => ({
@@ -79,9 +166,13 @@ export default function TrustPassportPage() {
           <ArrowLeft className="w-4 h-4" /> Back to Profile
         </Link>
         <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 border border-slate-200 rounded-lg px-3 py-1.5 hover:bg-white transition-all">
-            <QrCode className="w-3.5 h-3.5" /> QR Code
-          </button>
+          <div className="bg-white p-1.5 rounded-lg border border-slate-200 shadow-sm">
+            <QRCodeSVG
+              value={`https://verify.trustgrid.ng/${(worker as any)?.passportCode ?? `TGP-${id.slice(-8).toUpperCase()}`}`}
+              size={72}
+              level="M"
+            />
+          </div>
           <button className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-brand-600 rounded-lg px-3 py-1.5 hover:bg-brand-700 transition-colors shadow-brand">
             <Share2 className="w-3.5 h-3.5" /> Share Passport
           </button>
@@ -211,14 +302,27 @@ export default function TrustPassportPage() {
               </div>
             </div>
 
-            {/* Verification */}
+            {/* ── VERIFICATION SECTION ─────────────────────────────────── */}
             <div className="px-8 py-6">
-              <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-                Verification Record
-              </h2>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                  Verification Record
+                </h2>
+                {!isVerified && (
+                  <button
+                    onClick={() => setVerifyOpen(v => !v)}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    {verifyOpen ? 'Hide' : 'Verify Identity'}
+                  </button>
+                )}
+              </div>
+
+              {/* Status badges */}
+              <div className="flex flex-wrap gap-2 mb-4">
                 <VerificationBadge status={worker.verificationStatus as any} size="md" showLabel />
-                {worker.verificationStatus === 'FULLY_VERIFIED' && (
+                {isVerified && (
                   <>
                     <span className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-full px-3 py-1 text-xs font-semibold">
                       <ShieldCheck className="w-3.5 h-3.5" /> NIN Confirmed
@@ -231,6 +335,188 @@ export default function TrustPassportPage() {
                   </>
                 )}
               </div>
+
+              {/* ── INLINE VERIFICATION FORM ─────────────────────────── */}
+              {verifyOpen && !isVerified && (
+                <div className="mt-4 border border-indigo-100 rounded-2xl bg-indigo-50/40 p-5 space-y-5">
+
+                  {verifySuccess ? (
+                    /* Success state */
+                    <div className="text-center py-4">
+                      <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+                      <p className="font-bold text-slate-800">Verification submitted!</p>
+                      <p className="text-sm text-slate-500 mt-1">
+                        Results will reflect on the passport within a few seconds.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Method toggle */}
+                      <div>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                          Verification Method
+                        </p>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => { setVerifyMethod('selfie'); setUploadBase64(null) }}
+                            className={cn(
+                              'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-sm font-semibold transition-all',
+                              verifyMethod === 'selfie'
+                                ? 'bg-white border-indigo-400 text-indigo-700 shadow-sm'
+                                : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                            )}
+                          >
+                            <Camera className="w-4 h-4" />
+                            Live Selfie
+                            <span className="text-[10px] bg-indigo-100 text-indigo-600 rounded-full px-1.5 py-0.5 font-bold ml-1">
+                              Recommended
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => { setVerifyMethod('upload'); setLivePhotoBase64(null); setLivenessSessionId(null) }}
+                            className={cn(
+                              'flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border text-sm font-semibold transition-all',
+                              verifyMethod === 'upload'
+                                ? 'bg-white border-indigo-400 text-indigo-700 shadow-sm'
+                                : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                            )}
+                          >
+                            <Upload className="w-4 h-4" />
+                            Upload Photo
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Photo capture / upload */}
+                      {verifyMethod === 'selfie' ? (
+                        livePhotoBase64 ? (
+                          /* Preview of captured selfie */
+                          <div className="text-center space-y-3">
+                            <div className="relative rounded-2xl overflow-hidden bg-gray-900 aspect-video max-w-sm mx-auto">
+                              <img
+                                src={`data:image/jpeg;base64,${livePhotoBase64}`}
+                                className="w-full h-full object-cover scale-x-[-1]"
+                                alt="Captured selfie"
+                              />
+                              <div className="absolute top-2 right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <CheckCircle className="w-3 h-3" /> Captured
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => { setLivePhotoBase64(null); setLivenessSessionId(null) }}
+                              className="text-xs text-slate-500 hover:text-slate-700 underline"
+                            >
+                              Retake selfie
+                            </button>
+                          </div>
+                        ) : (
+                          <LivenessCheck
+                            workerId={id}
+                            onCapture={handleLivenessCapture}
+                            onSkip={() => setVerifyMethod('upload')}
+                          />
+                        )
+                      ) : (
+                        /* Upload photo */
+                        <div className="space-y-3">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleFileSelect}
+                          />
+                          {uploadBase64 ? (
+                            <div className="text-center space-y-2">
+                              <img
+                                src={`data:image/jpeg;base64,${uploadBase64}`}
+                                className="w-32 h-32 object-cover rounded-2xl mx-auto border-2 border-indigo-200"
+                                alt="Uploaded photo"
+                              />
+                              <button
+                                onClick={() => { setUploadBase64(null); fileInputRef.current?.click() }}
+                                className="text-xs text-slate-500 hover:text-slate-700 underline"
+                              >
+                                Choose different photo
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => fileInputRef.current?.click()}
+                              className="w-full border-2 border-dashed border-slate-200 rounded-2xl py-8 flex flex-col items-center gap-2 text-slate-400 hover:border-indigo-300 hover:text-indigo-500 transition-colors"
+                            >
+                              <Upload className="w-8 h-8" />
+                              <span className="text-sm font-medium">Click to upload a photo</span>
+                              <span className="text-xs">JPG or PNG, max 5 MB</span>
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {/* ID inputs */}
+                      <div className="space-y-3">
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                          Government ID
+                        </p>
+                        <div className="flex gap-2">
+                          {['NIN', 'BVN'].map(t => (
+                            <button
+                              key={t}
+                              onClick={() => setIdType(t)}
+                              className={cn(
+                                'flex-1 py-2 rounded-xl text-sm font-bold border transition-colors',
+                                idType === t
+                                  ? 'bg-indigo-600 text-white border-indigo-600'
+                                  : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
+                              )}
+                            >
+                              {t}
+                            </button>
+                          ))}
+                        </div>
+                        <input
+                          type="text"
+                          value={idNumber}
+                          onChange={e => setIdNumber(e.target.value)}
+                          placeholder={`Enter your ${idType} number`}
+                          maxLength={11}
+                          className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+                        />
+                      </div>
+
+                      {/* Error */}
+                      {verifyError && (
+                        <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600">
+                          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                          {verifyError}
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="flex gap-3">
+                        <button
+                          onClick={resetVerifyPanel}
+                          className="flex-1 border border-slate-200 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={submitVerification}
+                          disabled={verifying || (!livePhotoBase64 && !uploadBase64) || !idNumber.trim()}
+                          className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white disabled:opacity-60 transition-opacity"
+                          style={{ background: 'linear-gradient(135deg,#4F46E5,#0D9488)' }}
+                        >
+                          {verifying ? (
+                            <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</>
+                          ) : (
+                            <><ShieldCheck className="w-4 h-4" /> Submit Verification</>
+                          )}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Credentials */}
@@ -280,7 +566,7 @@ export default function TrustPassportPage() {
                   Recent Deployments
                 </h2>
                 <div className="trust-timeline">
-                  {worker.recentReviews.slice(0, 4).map((r: any, i: number) => (
+                  {worker.recentReviews.slice(0, 4).map((r: any) => (
                     <div key={r.id} className={`trust-timeline-item ${r.overallRating >= 4 ? 'positive' : r.overallRating <= 2 ? 'negative' : ''}`}>
                       <div className="flex items-center justify-between">
                         <div>
@@ -342,6 +628,17 @@ export default function TrustPassportPage() {
                   </p>
                 </div>
               )}
+            </div>
+
+            {/* QR Code */}
+            <div className="px-8 py-5 flex items-center justify-center bg-slate-50 border-t border-slate-100">
+              <div className="bg-white p-2 rounded-xl inline-block shadow">
+                <QRCodeSVG
+                  value={`https://verify.trustgrid.ng/${(worker as any)?.passportCode ?? `TGP-${id.slice(-8).toUpperCase()}`}`}
+                  size={72}
+                  level="M"
+                />
+              </div>
             </div>
 
             {/* Footer */}

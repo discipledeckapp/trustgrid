@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Shield, ShieldCheck, ShieldX, ShieldAlert, Star, Award, Users, CheckCircle, XCircle, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useBrand } from '@/hooks/useBrand'
+import { QRCodeSVG } from 'qrcode.react'
 
 interface VerifyResult {
   valid: boolean
@@ -156,6 +157,19 @@ export default function PublicVerifyClient({ passportCode }: { passportCode: str
                     </span>
                   )}
                 </div>
+              </div>
+            </div>
+
+            {/* QR code — holder can screenshot and share */}
+            <div className="flex justify-center pt-4 pb-2">
+              <div className="bg-white p-3 rounded-2xl shadow-sm inline-block">
+                <QRCodeSVG
+                  value={`https://verify.trustgrid.ng/${result.passportCode}`}
+                  size={120}
+                  level="M"
+                  includeMargin={false}
+                />
+                <p className="text-center text-[10px] text-gray-400 mt-2 font-mono">{result.passportCode}</p>
               </div>
             </div>
 
