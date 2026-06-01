@@ -1,6 +1,7 @@
 import Navbar from '@/components/sections/Navbar'
 import Hero from '@/components/sections/Hero'
 import Problem from '@/components/sections/Problem'
+import InstitutionalMemory from '@/components/sections/InstitutionalMemory'
 import Solution from '@/components/sections/Solution'
 import Features from '@/components/sections/Features'
 import WhoWeServe from '@/components/sections/WhoWeServe'
@@ -11,10 +12,11 @@ import Footer from '@/components/sections/Footer'
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen" style={{background:'#0A0A0F',color:'#F8FAFC'}}>
       <Navbar />
       <Hero />
       <Problem />
+      <InstitutionalMemory />
       <Solution />
       <Features />
       <WhoWeServe />

@@ -5,23 +5,15 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50:  '#eff6ff',
-          100: '#dbeafe',
-          500: '#3b82f6',
-          600: '#1d4ed8',
-          700: '#1e40af',
-          800: '#1e3a8a',
-          900: '#1e3058',
-        },
-        trust: {
-          green:  '#10b981',
-          yellow: '#f59e0b',
-          red:    '#ef4444',
-        },
+        brand: { DEFAULT: '#4F46E5', 600: '#4F46E5', 700: '#4338CA' },
+        teal:  { DEFAULT: '#0D9488', 600: '#0D9488' },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans:    ['"Plus Jakarta Sans"', '"Inter"', 'system-ui', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+      },
+      backgroundImage: {
+        'brand-gradient': 'linear-gradient(135deg, #4F46E5 0%, #0D9488 100%)',
       },
     },
   },

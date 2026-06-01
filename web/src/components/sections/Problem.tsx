@@ -1,57 +1,78 @@
-const problems = [
-  { question: 'Who can we trust?', cause: 'No verification layer — anyone can be recommended' },
-  { question: 'Who performed well?', cause: 'Memory and verbal recommendations only' },
-  { question: 'Who should we rehire?', cause: 'No deployment or performance history' },
-  { question: 'Who has unresolved incidents?', cause: 'Incidents forgotten or buried in chats' },
-  { question: 'How do we staff 500 workers for our convention?', cause: 'No workforce management system' },
-]
-
 export default function Problem() {
   return (
-    <section id="problem" className="py-20 px-6 bg-gray-50">
+    <section id="problem" className="py-24 px-6 relative" style={{background:'linear-gradient(180deg,#0A0A0F 0%,#0F0F1A 100%)'}}>
       <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-brand-700 font-semibold text-sm uppercase tracking-widest mb-3">The Problem</p>
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            The problem is not finding workers.<br />It is trusting them.
+        {/* Section label */}
+        <div className="text-center mb-16">
+          <span className="text-indigo-400 text-sm font-semibold uppercase tracking-widest">The Problem</span>
+          <h2 className="text-4xl md:text-5xl font-black text-white mt-3 leading-tight">
+            Your workers are managed<br />
+            <span className="text-gradient">on WhatsApp. That is not enough.</span>
           </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Every estate, church, school, and event organiser in Nigeria already knows workers.
-            The crisis is governance — there is no institutional infrastructure to answer these questions with data.
+          <p className="text-white/50 text-lg mt-4 max-w-2xl mx-auto">
+            Every estate, church, school, and event organiser in Nigeria already knows service workers. The problem is not finding them. The problem is knowing who to trust.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4 mb-12">
-          {problems.map((p) => (
-            <div key={p.question} className="bg-white rounded-xl p-6 border border-red-100">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-red-500 text-xs font-bold">?</span>
+        {/* Two-column: the current reality vs. questions you cannot answer */}
+        <div className="grid md:grid-cols-2 gap-6 mb-16">
+          {/* Left: what institutions use today */}
+          <div className="glass rounded-2xl p-6 border border-red-500/10">
+            <div className="text-sm text-red-400 font-semibold uppercase tracking-widest mb-4">How institutions manage today</div>
+            <div className="space-y-3">
+              {[
+                { icon: '💬', label: 'WhatsApp groups', sub: 'Data lost when contacts change' },
+                { icon: '📊', label: 'Excel spreadsheets', sub: 'No search, no history, no alerts' },
+                { icon: '🗣️', label: 'Word of mouth', sub: 'Unverifiable, biased, breaks down at scale' },
+                { icon: '📞', label: 'Personal phone books', sub: 'Gone when the manager leaves' },
+              ].map(({ icon, label, sub }) => (
+                <div key={label} className="flex items-start gap-3 py-2 border-b border-white/5 last:border-0">
+                  <span className="text-xl mt-0.5">{icon}</span>
+                  <div>
+                    <div className="text-white/80 text-sm font-medium">{label}</div>
+                    <div className="text-white/30 text-xs mt-0.5">{sub}</div>
+                  </div>
+                  <div className="ml-auto shrink-0 w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center">
+                    <svg className="w-3 h-3 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12"/></svg>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-gray-900">{p.question}</p>
-                  <p className="text-gray-500 text-sm mt-1">{p.cause}</p>
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Right: questions they cannot answer */}
+          <div className="glass rounded-2xl p-6 border border-white/5">
+            <div className="text-sm text-white/40 font-semibold uppercase tracking-widest mb-4">Questions you cannot answer today</div>
+            <div className="space-y-3">
+              {[
+                'Which workers can we actually trust?',
+                'Who performed well last convention?',
+                'Does this person have open incidents?',
+                'Which company is verified for our estate?',
+                'How do we staff 500 workers for 3 days?',
+                'What happened to last year\'s worker records?',
+              ].map((q) => (
+                <div key={q} className="flex items-start gap-2.5 py-2 border-b border-white/5 last:border-0">
+                  <div className="w-1.5 h-1.5 bg-amber-400/60 rounded-full mt-2 shrink-0" />
+                  <span className="text-white/60 text-sm">{q}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
-          <p className="text-center text-gray-500 text-sm font-medium uppercase tracking-widest mb-6">
-            Where this information lives today
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            {['WhatsApp Groups', 'Excel Spreadsheets', 'Personal Contacts', 'Verbal Recommendations', 'Physical Notebooks'].map((item) => (
-              <div key={item} className="flex items-center gap-2 bg-gray-50 border border-gray-200 px-4 py-2 rounded-lg">
-                <span className="text-red-400">✗</span>
-                <span className="text-gray-700 text-sm">{item}</span>
-              </div>
-            ))}
+        {/* The cost callout */}
+        <div className="rounded-2xl p-8 text-center relative overflow-hidden" style={{background:'linear-gradient(135deg,rgba(79,70,229,0.1),rgba(13,148,136,0.1))'}}>
+          <div className="absolute inset-0 border border-indigo-500/20 rounded-2xl" />
+          <div className="relative">
+            <div className="text-4xl mb-4">⚡</div>
+            <p className="text-xl font-bold text-white mb-2">
+              One unvetted worker incident can cost an institution<br className="hidden md:block" /> more than a year of TrustGrid.
+            </p>
+            <p className="text-white/40 text-sm">
+              Legal fees, reputational damage, replacement costs — none of which appear in the WhatsApp group.
+            </p>
           </div>
-          <p className="text-center text-gray-500 text-sm mt-6">
-            This data is lost every time a coordinator changes, a phone is stolen, or a WhatsApp group is deleted.
-          </p>
         </div>
       </div>
     </section>

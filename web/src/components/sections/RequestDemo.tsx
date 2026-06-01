@@ -2,152 +2,127 @@
 import { useState } from 'react'
 
 export default function RequestDemo() {
-  const [form, setForm] = useState({
-    institutionName: '',
-    name: '',
-    role: '',
-    phone: '',
-    institutionType: '',
-    message: '',
-  })
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+  const [form, setForm] = useState({ institutionName:'', name:'', role:'', phone:'', institutionType:'', message:'' })
+  const [status, setStatus] = useState<'idle'|'submitting'|'success'|'error'>('idle')
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setStatus('submitting')
     try {
       const res = await fetch('/api/demo-request', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type':'application/json'},
         body: JSON.stringify(form),
       })
-      if (res.ok) {
-        setStatus('success')
-        setForm({ institutionName: '', name: '', role: '', phone: '', institutionType: '', message: '' })
-      } else {
-        setStatus('error')
-      }
-    } catch {
-      setStatus('error')
-    }
+      setStatus(res.ok ? 'success' : 'error')
+      if (res.ok) setForm({ institutionName:'', name:'', role:'', phone:'', institutionType:'', message:'' })
+    } catch { setStatus('error') }
   }
 
   return (
-    <section id="request-demo" className="py-20 px-6 bg-gray-50">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-10">
-          <p className="text-brand-700 font-semibold text-sm uppercase tracking-widest mb-3">Get Started</p>
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Request a Demo</h2>
-          <p className="text-gray-600">
-            Tell us about your institution. We will reach out within 24 hours to schedule a live walkthrough.
-          </p>
-        </div>
-
-        {status === 'success' ? (
-          <div className="bg-white rounded-2xl border border-green-200 p-10 text-center">
-            <div className="text-5xl mb-4">✅</div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Request received!</h3>
-            <p className="text-gray-600">We will contact you within 24 hours at the number provided.</p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 p-8 space-y-5">
-            <div className="grid md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Institution Name *</label>
-                <input
-                  required
-                  type="text"
-                  placeholder="e.g. Redemption City Estate"
-                  value={form.institutionName}
-                  onChange={e => setForm({ ...form, institutionName: e.target.value })}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Institution Type *</label>
-                <select
-                  required
-                  value={form.institutionType}
-                  onChange={e => setForm({ ...form, institutionType: e.target.value })}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 bg-white"
-                >
-                  <option value="">Select type</option>
-                  <option>Estate / Residential Community</option>
-                  <option>Church / Religious Organisation</option>
-                  <option>School / University</option>
-                  <option>Convention / Event Organiser</option>
-                  <option>Facility Management Company</option>
-                  <option>Smart City / Government</option>
-                  <option>Other</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Your Name *</label>
-                <input
-                  required
-                  type="text"
-                  placeholder="Full name"
-                  value={form.name}
-                  onChange={e => setForm({ ...form, name: e.target.value })}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Your Role *</label>
-                <input
-                  required
-                  type="text"
-                  placeholder="e.g. Estate Manager, Facility Director"
-                  value={form.role}
-                  onChange={e => setForm({ ...form, role: e.target.value })}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number *</label>
-              <input
-                required
-                type="tel"
-                placeholder="+234 801 234 5678"
-                value={form.phone}
-                onChange={e => setForm({ ...form, phone: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Tell us about your challenge (optional)</label>
-              <textarea
-                rows={3}
-                placeholder="How many workers do you manage? What is your biggest pain point today?"
-                value={form.message}
-                onChange={e => setForm({ ...form, message: e.target.value })}
-                className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 resize-none"
-              />
-            </div>
-
-            {status === 'error' && (
-              <p className="text-red-500 text-sm">Something went wrong. Please email us at hello@trustgrid.ng</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={status === 'submitting'}
-              className="w-full bg-brand-700 text-white py-4 rounded-xl font-semibold hover:bg-brand-800 transition-colors disabled:opacity-60"
-            >
-              {status === 'submitting' ? 'Sending...' : 'Request a Demo →'}
-            </button>
-
-            <p className="text-center text-xs text-gray-400">
-              We respond within 24 hours · hello@trustgrid.ng
+    <section id="request-demo" className="py-24 px-6" style={{background:'#0A0A0F'}}>
+      <div className="max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-12 items-start">
+          {/* Left: copy */}
+          <div>
+            <span className="text-indigo-400 text-sm font-semibold uppercase tracking-widest">Get Started</span>
+            <h2 className="text-4xl font-black text-white mt-3 mb-4 leading-tight">
+              See TrustGrid<br />
+              <span className="text-gradient">working for your institution</span>
+            </h2>
+            <p className="text-white/50 leading-relaxed mb-8">
+              We will set up a live demo with your actual use case — whether you manage an estate, run a convention, or operate a school. You will see real workers, real trust scores, and a real deployment flow.
             </p>
-          </form>
-        )}
+
+            {/* What to expect */}
+            <div className="space-y-4">
+              {[
+                { icon: '🎯', title: '30-minute focused demo', desc: 'Tailored to your institution type — no generic slides' },
+                { icon: '⚡', title: 'Live product walkthrough', desc: 'The actual platform, not a prototype' },
+                { icon: '🤝', title: 'Pilot discussion', desc: 'We will discuss a free pilot for qualifying institutions' },
+              ].map(({ icon, title, desc }) => (
+                <div key={title} className="flex items-start gap-3">
+                  <span className="text-xl mt-0.5">{icon}</span>
+                  <div>
+                    <div className="text-white font-semibold text-sm">{title}</div>
+                    <div className="text-white/40 text-sm">{desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Contact */}
+            <div className="mt-8 pt-8 border-t border-white/5">
+              <p className="text-white/30 text-sm mb-2">Prefer to reach out directly?</p>
+              <a href="mailto:hello@trustgrid.ng" className="text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors">hello@trustgrid.ng</a>
+            </div>
+          </div>
+
+          {/* Right: form */}
+          <div>
+            {status === 'success' ? (
+              <div className="glass rounded-2xl p-8 text-center">
+                <div className="text-5xl mb-4">✅</div>
+                <h3 className="text-xl font-black text-white mb-2">Request received!</h3>
+                <p className="text-white/50">We will reach out within 24 hours at the number you provided.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="glass rounded-2xl p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <label className="block text-xs text-white/40 font-medium mb-1.5">Institution Name *</label>
+                    <input required value={form.institutionName} onChange={e => setForm({...form,institutionName:e.target.value})}
+                      placeholder="e.g. Redemption City Estate"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-white/40 font-medium mb-1.5">Institution Type *</label>
+                    <select required value={form.institutionType} onChange={e => setForm({...form,institutionType:e.target.value})}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500/50">
+                      <option value="" className="bg-[#1a1a2e]">Select...</option>
+                      {['Estate / Community','Church / Religious Org','Convention / Event','School / University','Facility Management','Smart City / Government','Other'].map(t => (
+                        <option key={t} value={t} className="bg-[#1a1a2e]">{t}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-white/40 font-medium mb-1.5">Your Role *</label>
+                    <input required value={form.role} onChange={e => setForm({...form,role:e.target.value})}
+                      placeholder="e.g. Estate Manager"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-white/40 font-medium mb-1.5">Your Name *</label>
+                    <input required value={form.name} onChange={e => setForm({...form,name:e.target.value})}
+                      placeholder="Full name"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50" />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-white/40 font-medium mb-1.5">Phone Number *</label>
+                    <input required type="tel" value={form.phone} onChange={e => setForm({...form,phone:e.target.value})}
+                      placeholder="+234 801 234 5678"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs text-white/40 font-medium mb-1.5">What is your biggest challenge? (optional)</label>
+                    <textarea rows={2} value={form.message} onChange={e => setForm({...form,message:e.target.value})}
+                      placeholder="e.g. We manage 150 domestic workers with no system..."
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-indigo-500/50 resize-none" />
+                  </div>
+                </div>
+
+                {status === 'error' && <p className="text-red-400 text-xs">Something went wrong. Email us at hello@trustgrid.ng</p>}
+
+                <button type="submit" disabled={status==='submitting'}
+                  className="w-full py-3.5 rounded-xl font-bold text-white text-sm hover:opacity-90 disabled:opacity-60 transition-opacity"
+                  style={{background:'linear-gradient(135deg,#4F46E5,#0D9488)'}}>
+                  {status==='submitting' ? 'Sending...' : 'Request a Demo →'}
+                </button>
+                <p className="text-center text-xs text-white/20">We respond within 24 hours · hello@trustgrid.ng</p>
+              </form>
+            )}
+          </div>
+        </div>
       </div>
     </section>
   )

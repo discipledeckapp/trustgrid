@@ -1,47 +1,69 @@
-const steps = [
+const STEPS = [
   {
-    step: '01',
-    title: 'Onboard your institution',
-    desc: 'Register your estate, church, school, or organisation. Configure your trust score weights, service categories, and verification requirements.',
+    n: '01',
+    title: 'Institution registers',
+    desc: 'Estate, church, school, or facility manager registers their institution in minutes. Choose your configuration bundle. Set your service categories and trust thresholds.',
+    visual: '🏛️',
+    color: 'text-indigo-400',
   },
   {
-    step: '02',
-    title: 'Register your workers',
-    desc: 'Add workers via the dashboard or mobile app. Collect their details, skills, and identity documents. Verify via NIN or BVN.',
+    n: '02',
+    title: 'Workers & organisations onboard',
+    desc: 'Workers self-register via a 5-step wizard or an agent registers on their behalf. NIN/BVN verified, credentials uploaded, availability set. Organisations register their company with CAC verification.',
+    visual: '👥',
+    color: 'text-teal-400',
   },
   {
-    step: '03',
-    title: 'Build trust over time',
-    desc: 'Every deployment, rating, endorsement, and resolved incident automatically updates each worker\'s trust score.',
+    n: '03',
+    title: 'Trust scores build automatically',
+    desc: 'Every deployment, review, endorsement, and resolved incident updates trust scores in real time. The algorithm rewards reliability and accountability.',
+    visual: '⭐',
+    color: 'text-amber-400',
   },
   {
-    step: '04',
+    n: '04',
     title: 'Deploy with confidence',
-    desc: 'When you need workers — for a routine job or a 500-person convention — filter by skill and trust score. Assign verified people in minutes.',
+    desc: 'Filter your workforce registry by skill, trust score, and availability. Assign workers to service requests in seconds. For events — deploy 500 workers in under 2 minutes.',
+    visual: '🚀',
+    color: 'text-emerald-400',
+  },
+  {
+    n: '05',
+    title: 'Permanent institutional memory',
+    desc: 'Every assignment, incident, and review is permanently recorded. When your manager changes, the institutional memory stays. The community gets smarter with every interaction.',
+    visual: '📚',
+    color: 'text-violet-400',
   },
 ]
 
 export default function HowItWorks() {
   return (
-    <section className="py-20 px-6 bg-gray-50">
+    <section id="how-it-works" className="py-24 px-6" style={{background:'#0F0F1A'}}>
       <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-brand-700 font-semibold text-sm uppercase tracking-widest mb-3">How It Works</p>
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Up and running in days, not months</h2>
+        <div className="text-center mb-16">
+          <span className="text-indigo-400 text-sm font-semibold uppercase tracking-widest">How It Works</span>
+          <h2 className="text-4xl md:text-5xl font-black text-white mt-3 mb-4">
+            Up and running in a day.<br />
+            <span className="text-gradient">Permanent value from day one.</span>
+          </h2>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          {steps.map((s, i) => (
-            <div key={s.step} className="bg-white rounded-xl p-7 border border-gray-100">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-brand-700 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
-                  {s.step}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">{s.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
-                </div>
+        <div className="space-y-4">
+          {STEPS.map(({ n, title, desc, visual, color }, i) => (
+            <div key={n} className="glass glass-hover rounded-2xl p-6 flex items-start gap-6 transition-all">
+              <div className={`text-4xl font-black ${color} opacity-30 w-10 shrink-0 leading-none`}>{n}</div>
+              <div className="text-3xl shrink-0">{visual}</div>
+              <div className="flex-1">
+                <h3 className="font-bold text-white text-lg mb-2">{title}</h3>
+                <p className="text-white/50 text-sm leading-relaxed">{desc}</p>
               </div>
+              {i < STEPS.length - 1 && (
+                <div className="hidden md:block shrink-0 self-center text-white/10">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7"/>
+                  </svg>
+                </div>
+              )}
             </div>
           ))}
         </div>
