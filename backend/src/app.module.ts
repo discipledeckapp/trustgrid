@@ -8,6 +8,7 @@ import { RedisModule } from './common/redis/redis.module'
 import { HealthModule } from './common/health/health.module'
 import { EncryptionModule } from './common/encryption/encryption.module'
 import { EmailModule } from './common/email/email.module'
+import { NotificationsModule } from './common/notifications/notifications.module'
 import { QueuesModule } from './modules/queues/queues.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { InstitutionsModule } from './modules/institutions/institutions.module'
@@ -31,6 +32,7 @@ import { CommunityModule } from './modules/community/community.module'
 import { AuthorityModule } from './modules/authority/authority.module'
 import { TrustPassportModule } from './modules/trust-passport/trust-passport.module'
 import { OpportunitiesModule } from './modules/opportunities/opportunities.module'
+import { AdminModule } from './modules/admin/admin.module'
 import { pinoLoggerConfig } from './common/logger/logger.config'
 
 @Module({
@@ -54,6 +56,7 @@ import { pinoLoggerConfig } from './common/logger/logger.config'
     HealthModule,
     EncryptionModule,
     EmailModule,
+    NotificationsModule,
     QueuesModule,
 
     // Domain modules
@@ -81,6 +84,7 @@ import { pinoLoggerConfig } from './common/logger/logger.config'
     AuthorityModule,
     TrustPassportModule,
     OpportunitiesModule,
+    AdminModule,
   ],
 })
 export class AppModule {}
