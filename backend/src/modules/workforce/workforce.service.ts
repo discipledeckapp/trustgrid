@@ -3,6 +3,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TrustScoreService } from '../trust-score/trust-score.service';
@@ -10,6 +11,8 @@ import { CreateWorkerDto, WorkerFilterDto } from './dto/create-worker.dto';
 
 @Injectable()
 export class WorkforceService {
+  private readonly logger = new Logger(WorkforceService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly trustScoreService: TrustScoreService,
@@ -66,34 +69,54 @@ export class WorkforceService {
     const limit = Math.min(filter.limit ?? 20, 100);
     const skip = (page - 1) * limit;
 
-    const where: any = { institutionId, isActive: true };
+    // Fetch global workers who are active community members of this institution
+    const communityMemberships = await this.prisma.membership.findMany({
+      where: { institutionId, status: 'ACTIVE' },
+      select: { userId: true },
+    });
+    const globalWorkerUserIds = communityMemberships.map(m => m.userId);
+
+    // AND: must belong to institution (scoped or global community member)
+    const institutionScope = {
+      OR: [
+        { institutionId },
+        { isGlobal: true, userId: { in: globalWorkerUserIds } },
+      ],
+    };
+
+    const andFilters: any[] = [institutionScope, { isActive: true }];
 
     if (filter.skill) {
-      where.OR = [
-        { primarySkill: { contains: filter.skill, mode: 'insensitive' } },
-        { skills: { has: filter.skill } },
-      ];
+      andFilters.push({
+        OR: [
+          { primarySkill: { contains: filter.skill, mode: 'insensitive' } },
+          { skills: { has: filter.skill } },
+        ],
+      });
     }
     if (filter.categoryId) {
-      where.categoryIds = { has: filter.categoryId };
+      andFilters.push({ categoryIds: { has: filter.categoryId } });
     }
     if (filter.verificationStatus) {
-      where.verificationStatus = filter.verificationStatus;
+      andFilters.push({ verificationStatus: filter.verificationStatus });
     }
     if (filter.minTrustScore !== undefined) {
-      where.trustScore = { gte: Number(filter.minTrustScore) };
+      andFilters.push({ trustScore: { gte: Number(filter.minTrustScore) } });
     }
     if (filter.isAvailable === 'true') {
-      where.isAvailable = true;
+      andFilters.push({ isAvailable: true });
     }
     if (filter.search) {
-      where.OR = [
-        ...(where.OR ?? []),
-        { user: { firstName: { contains: filter.search, mode: 'insensitive' } } },
-        { user: { lastName: { contains: filter.search, mode: 'insensitive' } } },
-        { primarySkill: { contains: filter.search, mode: 'insensitive' } },
-      ];
+      andFilters.push({
+        OR: [
+          { user: { firstName: { contains: filter.search, mode: 'insensitive' } } },
+          { user: { lastName: { contains: filter.search, mode: 'insensitive' } } },
+          { primarySkill: { contains: filter.search, mode: 'insensitive' } },
+        ],
+      });
     }
+
+    const where: any = { AND: andFilters };
 
     const sortBy = filter.sortBy ?? 'trustScore';
     const sortOrder = filter.sortOrder ?? 'desc';
@@ -280,6 +303,55 @@ export class WorkforceService {
     });
 
     return workers.map(w => this.formatWorkerSummary(w));
+  }
+
+  async createMyProfile(userId: string, dto: {
+    primarySkill: string;
+    skills?: string[];
+    bio?: string;
+    yearsExperience?: number;
+    categoryIds?: string[];
+    hourlyRate?: number;
+    dailyRate?: number;
+  }) {
+    // Check if global profile already exists
+    const existing = await this.prisma.workerProfile.findFirst({
+      where: { userId, institutionId: null },
+    });
+    if (existing) throw new ConflictException('You already have a global worker profile');
+
+    const profile = await this.prisma.workerProfile.create({
+      data: {
+        userId,
+        institutionId: null,      // global worker — not tied to one institution
+        isGlobal: true,
+        ownedByUserId: userId,
+        primarySkill: dto.primarySkill,
+        skills: dto.skills ?? [dto.primarySkill],
+        bio: dto.bio,
+        yearsExperience: dto.yearsExperience,
+        categoryIds: dto.categoryIds ?? [],
+        hourlyRate: dto.hourlyRate,
+        dailyRate: dto.dailyRate,
+        workerType: 'FREELANCER' as any,
+        verificationStatus: 'UNVERIFIED' as any,
+      },
+      include: { user: { select: { firstName: true, lastName: true, profilePhotoUrl: true } } },
+    });
+
+    this.logger.log({ userId, profileId: profile.id }, 'global_worker_profile_created');
+    return profile;
+  }
+
+  async getMyProfile(userId: string) {
+    const profiles = await this.prisma.workerProfile.findMany({
+      where: { userId },
+      include: {
+        user: { select: { firstName: true, lastName: true, profilePhotoUrl: true, email: true, phone: true } },
+        identityVerification: { select: { status: true, verifiedAt: true, faceMatchPassed: true } },
+      },
+    });
+    return { profiles, count: profiles.length };
   }
 
   private formatWorkerSummary(w: any) {

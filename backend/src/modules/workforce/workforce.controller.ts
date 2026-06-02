@@ -46,6 +46,21 @@ export class WorkforceController {
     return this.workforceService.listWorkers(user.institutionId, filter);
   }
 
+  @Get('me/profile')
+  @ApiOperation({ summary: 'Get my worker profile(s)' })
+  getMyProfile(@CurrentUser() user: CurrentUserPayload) {
+    return this.workforceService.getMyProfile(user.sub);
+  }
+
+  @Post('me/profile')
+  @ApiOperation({ summary: 'Create my global worker profile (self-service, any role)' })
+  createMyProfile(
+    @Body() dto: { primarySkill: string; skills?: string[]; bio?: string; yearsExperience?: number; categoryIds?: string[]; hourlyRate?: number; dailyRate?: number },
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.workforceService.createMyProfile(user.sub, dto);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get full worker trust profile' })
   async getWorker(

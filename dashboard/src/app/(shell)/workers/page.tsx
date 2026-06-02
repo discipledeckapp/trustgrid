@@ -28,6 +28,7 @@ export default function WorkersPage() {
   const [minScore, setMinScore]   = useState(0)
   const [verifiedOnly, setVerifiedOnly] = useState(false)
   const [availableOnly, setAvailableOnly] = useState(false)
+  const [viewMode, setViewMode]   = useState<'institution' | 'global'>('institution')
 
   const filters = {
     ...(search       && { search }),
@@ -35,6 +36,7 @@ export default function WorkersPage() {
     ...(minScore > 0 && { minTrustScore: minScore }),
     ...(verifiedOnly && { verificationStatus: 'FULLY_VERIFIED' }),
     ...(availableOnly && { isAvailable: 'true' }),
+    ...(viewMode === 'global' && { global: 'true' }),
     sortBy: 'trustScore', sortOrder: 'desc', limit: 60,
   }
 
@@ -47,15 +49,37 @@ export default function WorkersPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">Workforce Registry</h1>
+          <h1 className="text-2xl font-black text-gray-900">
+            {viewMode === 'global' ? 'Global Worker Pool' : 'Workforce Registry'}
+          </h1>
           <p className="text-gray-500 mt-0.5">
-            {total > 0 ? `${total} workers in your registry` : 'No workers yet'}
+            {total > 0
+              ? viewMode === 'global'
+                ? `${total} workers across all communities`
+                : `${total} workers in your registry`
+              : viewMode === 'global' ? 'No global workers found' : 'No workers yet'}
           </p>
         </div>
         <Link href="/workers/add"
           className="flex items-center gap-2 bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-800 transition-colors shadow-sm shadow-blue-200">
           <Plus className="w-4 h-4" /> Add Worker
         </Link>
+      </div>
+
+      {/* View mode tabs — institution vs global pool */}
+      <div className="flex gap-2 mb-4">
+        {[
+          { key: 'institution', label: 'My Community Workers' },
+          { key: 'global',      label: '🌐 Global Pool' },
+        ].map(({ key, label }) => (
+          <button key={key} onClick={() => setViewMode(key as 'institution' | 'global')}
+            className={cn('px-4 py-2 rounded-xl text-sm font-semibold border transition-colors',
+              viewMode === key
+                ? 'bg-indigo-700 text-white border-indigo-700'
+                : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300')}>
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Search */}
