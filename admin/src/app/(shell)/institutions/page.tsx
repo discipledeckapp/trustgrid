@@ -7,13 +7,11 @@ import { cn, timeAgo } from '@/lib/utils'
 export default function AdminInstitutionsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-institutions'],
-    // In production this would be GET /admin/institutions (platform-level)
-    // For now we surface what the authenticated institution can see
-    queryFn: () => api.get('/institution').then(r => [r.data]),
+    queryFn: () => api.get('/admin/institutions').then(r => r.data),
     retry: false,
   })
 
-  const institutions = Array.isArray(data) ? data : []
+  const institutions = data?.data ?? []
 
   return (
     <div className="p-6 max-w-5xl">

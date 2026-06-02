@@ -11,7 +11,7 @@ export default function AdminWorkersPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-workers', minScore, verifiedOnly],
-    queryFn: () => api.get('/workers', {
+    queryFn: () => api.get('/admin/workers', {
       params: {
         sortBy: 'trustScore', sortOrder: 'desc', limit: 50,
         ...(minScore > 0 && { minTrustScore: minScore }),

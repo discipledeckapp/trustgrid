@@ -11,18 +11,10 @@ const PLAN_MRR: Record<string, number> = {
 }
 
 export default function AdminDashboardPage() {
-  // Try /admin/stats first; fall back to /institutions?limit=10
   const { data: adminStats } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: () => api.get('/admin/stats').then(r => r.data),
     retry: false,
-  })
-
-  const { data: institutionsPage } = useQuery({
-    queryKey: ['admin-institutions-dash'],
-    queryFn: () => api.get('/institutions?limit=10').then(r => r.data),
-    retry: false,
-    enabled: !adminStats,
   })
 
   const { data: apps } = useQuery({
@@ -31,11 +23,9 @@ export default function AdminDashboardPage() {
     retry: false,
   })
 
-  // Normalise: if adminStats is present use it, else derive from institutionsPage
-  const institutions: any[] = adminStats?.recentInstitutions
-    ?? (Array.isArray(institutionsPage?.data) ? institutionsPage.data : [])
+  const institutions: any[] = adminStats?.recentInstitutions ?? []
 
-  const totalInstitutions = adminStats?.totalInstitutions ?? institutionsPage?.total ?? institutions.length
+  const totalInstitutions = adminStats?.totalInstitutions ?? institutions.length
   const totalWorkers      = adminStats?.totalWorkers      ?? '—'
   const totalVerified     = adminStats?.totalVerifiedWorkers ?? '—'
   const totalPassports    = adminStats?.totalPassports    ?? '—'

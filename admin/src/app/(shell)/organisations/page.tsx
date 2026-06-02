@@ -7,7 +7,7 @@ import { cn, STATUS_COLORS, timeAgo } from '@/lib/utils'
 export default function AdminOrganisationsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-orgs'],
-    queryFn: () => api.get('/vendors', { params: { limit: 50 } }).then(r => r.data),
+    queryFn: () => api.get('/admin/organisations', { params: { limit: 50 } }).then(r => r.data),
     retry: false,
   })
 
