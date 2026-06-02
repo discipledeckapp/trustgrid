@@ -41,6 +41,7 @@ export default function PassportPage() {
   const qc = useQueryClient()
   const [copied, setCopied] = useState(false)
   const passportCardRef = useRef<HTMLDivElement>(null)
+  const printPassportRef = useRef<HTMLDivElement>(null)
 
   const { data: passport, isLoading } = useQuery({
     queryKey: ['my-passport'],
@@ -59,13 +60,16 @@ export default function PassportPage() {
   }
 
   async function downloadPDF() {
-    const canvas = await captureCard()
-    if (!canvas) return
+    // Use the dedicated print-optimized card if available, else fall back to main card
+    const target = printPassportRef.current ?? passportCardRef.current
+    if (!target) return
+    const { default: html2canvas } = await import('html2canvas')
+    const canvas = await html2canvas(target, { scale: 3, backgroundColor: null, useCORS: true, allowTaint: true })
     const { default: jsPDF } = await import('jspdf')
     const imgData = canvas.toDataURL('image/png')
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a6' })
     const pageWidth = pdf.internal.pageSize.getWidth()
-    const imgWidth  = pageWidth - 20
+    const imgWidth  = pageWidth - 10
     const imgHeight = (canvas.height * imgWidth) / canvas.width
     pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight)
     pdf.save(`TrustPassport-${passportCode ?? 'TGP'}.pdf`)
@@ -157,7 +161,7 @@ export default function PassportPage() {
         <div className="relative flex items-start justify-between gap-6">
           <div className="flex items-start gap-5">
             {identity?.profilePhotoUrl ? (
-              <img src={identity.profilePhotoUrl} alt="" className="w-20 h-20 rounded-2xl object-cover border-2 border-white/20 shrink-0" />
+              <img src={identity.profilePhotoUrl} alt="" crossOrigin="anonymous" className="w-20 h-20 rounded-2xl object-cover border-2 border-white/20 shrink-0" />
             ) : (
               <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
                 <span className="text-3xl font-black text-white/60">
@@ -231,6 +235,41 @@ export default function PassportPage() {
           </button>
         </div>
       )}
+
+      {/* Hidden A6 print-optimized passport card */}
+      <div ref={printPassportRef} style={{ position: 'fixed', left: '-9999px', top: 0, width: '595px' }}>
+        <div style={{ width: '595px', height: '380px', padding: '32px', boxSizing: 'border-box' as const, background: 'linear-gradient(135deg,#1e1b4b 0%,#0f172a 100%)', display: 'flex', flexDirection: 'column' as const, justifyContent: 'space-between', fontFamily: 'Inter, sans-serif' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '9px', letterSpacing: '0.2em', margin: 0, textTransform: 'uppercase' as const }}>Community Trust Passport</p>
+              <p style={{ color: 'white', fontSize: '16px', fontWeight: 900, margin: '2px 0 0' }}>TrustGrid</p>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', fontFamily: 'monospace', margin: 0 }}>{passportCode}</p>
+          </div>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+            {identity?.profilePhotoUrl ? (
+              <img src={identity.profilePhotoUrl} crossOrigin="anonymous"
+                style={{ width: '80px', height: '80px', borderRadius: '12px', objectFit: 'cover' as const, flexShrink: 0, border: '2px solid rgba(255,255,255,0.15)' }} alt="" />
+            ) : (
+              <div style={{ width: '80px', height: '80px', borderRadius: '12px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.5)', fontSize: '32px', fontWeight: 900, flexShrink: 0 }}>
+                {identity?.displayName?.[0] ?? '?'}
+              </div>
+            )}
+            <div>
+              <p style={{ color: 'white', fontSize: '22px', fontWeight: 900, margin: '0 0 4px' }}>{identity?.displayName}</p>
+              <p style={{ color: 'rgba(165,180,252,0.85)', fontSize: '13px', margin: '0 0 10px' }}>{identity?.primarySkill}</p>
+              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px', margin: 0 }}>
+                Trust: <strong style={{ color: 'white' }}>{trustScore?.grade} · {Math.round(trustScore?.score ?? 0)}</strong>
+                {identity?.idVerified ? '  ·  ✓ ID Verified' : ''}
+              </p>
+            </div>
+          </div>
+          <div>
+            <p style={{ color: 'rgba(255,255,255,0.2)', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase' as const, margin: '0 0 3px' }}>Scan to verify</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontFamily: 'monospace', margin: 0 }}>verify.trustgrid.ng/{passportCode}</p>
+          </div>
+        </div>
+      </div>
 
       {/* Stats row */}
       {reputation && (

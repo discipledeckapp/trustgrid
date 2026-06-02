@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common'
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { VendorsService, CreateVendorDto } from './vendors.service'
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard'
@@ -65,5 +65,15 @@ export class VendorsController {
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.vendorsService.blacklist(id, user.institutionId, body.reason)
+  }
+
+  @Post(':id/recompute-trust-score')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Recompute and save vendor trust score based on verification, ratings, and contracts' })
+  async recomputeTrustScore(
+    @Param('id') id: string,
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.vendorsService.recomputeAndSaveVendorTrustScore(id, user.institutionId)
   }
 }

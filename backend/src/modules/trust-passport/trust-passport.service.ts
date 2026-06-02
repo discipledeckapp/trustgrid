@@ -399,4 +399,18 @@ export class TrustPassportService {
       },
     })
   }
+
+  async getExpiringCredentials(institutionId: string) {
+    const today = new Date()
+    const thirtyDays = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30)
+    return this.prisma.trustCredential.findMany({
+      where: {
+        institutionId,
+        status: 'ACTIVE',
+        expiresAt: { lte: thirtyDays, gte: today },
+      },
+      include: { passport: true },
+      orderBy: { expiresAt: 'asc' },
+    })
+  }
 }

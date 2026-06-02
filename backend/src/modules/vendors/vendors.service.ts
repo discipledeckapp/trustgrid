@@ -86,4 +86,39 @@ export class VendorsService {
       data: { isBlacklisted: true, blacklistReason: reason, isPreferred: false },
     })
   }
+
+  async computeVendorTrustScore(id: string, institutionId: string): Promise<number> {
+    const vendor = await this.prisma.vendorProfile.findFirst({
+      where: { id, institutionId },
+    })
+    if (!vendor) return 0
+
+    let score = 20 // base
+
+    // +20 for CAC verification
+    if (vendor.verificationStatus === 'FULLY_VERIFIED' && vendor.rcNumber) score += 20
+
+    // +15 based on contract completion rate
+    if (vendor.totalContracts > 0) {
+      score += Math.round(15 * Math.min(vendor.completedContracts / vendor.totalContracts, 1))
+    }
+
+    // +10 based on average rating (out of 5)
+    if (vendor.averageRating) {
+      score += Math.round(10 * (vendor.averageRating / 5))
+    }
+
+    // -10 for blacklist
+    if (vendor.isBlacklisted) score -= 10
+
+    return Math.max(0, Math.min(100, score))
+  }
+
+  async recomputeAndSaveVendorTrustScore(id: string, institutionId: string) {
+    const score = await this.computeVendorTrustScore(id, institutionId)
+    return this.prisma.vendorProfile.update({
+      where: { id },
+      data: { trustScore: score },
+    })
+  }
 }

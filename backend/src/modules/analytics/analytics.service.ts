@@ -107,13 +107,13 @@ export class AnalyticsService {
         };
       }),
       trustedOrganisations: await this.prisma.organisation.findMany({
-        where: { institutionId, verificationStatus: 'VERIFIED' },
+        where: { institutionId, verificationStatus: 'FULLY_VERIFIED' },
         select: {
           id: true, name: true, type: true, logoUrl: true,
-          rcNumber: true, verifiedAt: true,
+          rcNumber: true, reviewedAt: true,
           _count: { select: { workers: true } },
         },
-        orderBy: { verifiedAt: 'desc' },
+        orderBy: { reviewedAt: 'desc' },
         take: 6,
       }),
       recentActivity: recentActivity.map(e => ({

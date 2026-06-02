@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common'
+import { Controller, Get, Post, Body, Query, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { BlacklistService, BlacklistWorkerDto, UnblacklistDto } from './blacklist.service'
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard'
@@ -46,5 +46,27 @@ export class BlacklistController {
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.blacklistService.unblacklistWorker(dto, user.institutionId, user.sub)
+  }
+
+  @Post('workers/:workerId/dispute')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Submit a dispute against a blacklist/suspension decision' })
+  submitDispute(
+    @Param('workerId') workerId: string,
+    @Body() body: { reason: string; evidenceUrl?: string },
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.blacklistService.submitDispute(workerId, user.sub, user.institutionId, body.reason, body.evidenceUrl)
+  }
+
+  @Post('workers/:workerId/resolve-dispute')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resolve a blacklist dispute — UPHELD keeps suspension, OVERTURNED reinstates worker' })
+  resolveDispute(
+    @Param('workerId') workerId: string,
+    @Body() body: { resolution: 'UPHELD' | 'OVERTURNED'; notes: string },
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.blacklistService.resolveDispute(workerId, body.resolution, user.sub, user.institutionId, body.notes)
   }
 }

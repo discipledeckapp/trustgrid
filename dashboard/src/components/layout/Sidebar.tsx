@@ -6,12 +6,13 @@ import { clearAuth } from '@/lib/api'
 import {
   LayoutDashboard, Users, ClipboardList,
   AlertTriangle, BarChart2, Settings,
-  LogOut, UserPlus, Building2, Heart, Home, ShieldOff, Tag, CreditCard, Shield, Briefcase, User,
+  LogOut, UserPlus, Building2, Heart, Home, ShieldOff, Tag, CreditCard, Shield, Briefcase, User, ScanLine,
 } from 'lucide-react'
 
 const NAV = [
   { href: '/dashboard',        label: 'Overview',         icon: LayoutDashboard },
   { href: '/passport',         label: 'Trust Passport',   icon: Shield },
+  { href: '/gate',             label: 'Gate Check-In',    icon: ScanLine },
   { href: '/profile',          label: 'My Profile',       icon: User },
   { href: '/opportunities',    label: 'Opportunities',    icon: Briefcase },
   { href: '/workers',          label: 'Workforce',        icon: Users },

@@ -212,4 +212,71 @@ export class BlacklistService {
     })
     return worker?.verificationStatus === 'SUSPENDED'
   }
+
+  async submitDispute(workerId: string, userId: string, institutionId: string, reason: string, evidenceUrl?: string) {
+    const worker = await this.prisma.workerProfile.findFirst({
+      where: { id: workerId, institutionId },
+      include: { user: { select: { id: true, firstName: true, lastName: true, phone: true } } },
+    })
+    if (!worker) throw new NotFoundException('Worker not found')
+
+    // Create a dispute incident for audit trail
+    const incident = await this.prisma.incidentReport.create({
+      data: {
+        institutionId,
+        workerId,
+        reportedById: userId,
+        title: `Blacklist Dispute — BLACKLIST-${workerId.slice(-8).toUpperCase()}`,
+        description: `DISPUTE SUBMITTED by ${worker.user.firstName} ${worker.user.lastName}:\n\n${reason}${evidenceUrl ? `\n\nEvidence: ${evidenceUrl}` : ''}`,
+        severity: 'MEDIUM',
+        status: 'OPEN',
+        incidentDate: new Date(),
+      },
+    })
+
+    this.logger.log({ workerId, disputeIncidentId: incident.id }, 'blacklist_dispute_submitted')
+
+    return {
+      status: 'DISPUTE_SUBMITTED',
+      workerId,
+      workerName: `${worker.user.firstName} ${worker.user.lastName}`,
+      disputeReference: incident.id,
+      message: 'Your dispute has been submitted. The institution administrator will review it and respond.',
+    }
+  }
+
+  async resolveDispute(workerId: string, resolution: 'UPHELD' | 'OVERTURNED', resolvedById: string, institutionId: string, notes: string) {
+    const worker = await this.prisma.workerProfile.findFirst({
+      where: { id: workerId, institutionId },
+      include: { user: { select: { firstName: true, lastName: true, phone: true } } },
+    })
+    if (!worker) throw new NotFoundException('Worker not found')
+
+    if (resolution === 'OVERTURNED') {
+      // Reinstate the worker
+      await this.unblacklistWorker(
+        { workerId, reason: `Dispute resolved — blacklist overturned. ${notes}`, notifyWorker: true },
+        institutionId,
+        resolvedById,
+      )
+      return {
+        resolution: 'OVERTURNED',
+        workerName: `${worker.user.firstName} ${worker.user.lastName}`,
+        message: 'Dispute resolved. Worker has been reinstated and notified.',
+      }
+    } else {
+      // Upheld — notify worker that the appeal was rejected
+      if (worker.user.phone) {
+        await this.termii.sendSMS(
+          worker.user.phone,
+          `TrustGrid: Your dispute against blacklisting (BLACKLIST-${workerId.slice(-8).toUpperCase()}) has been reviewed and upheld. ${notes}`,
+        ).catch(() => {})
+      }
+      return {
+        resolution: 'UPHELD',
+        workerName: `${worker.user.firstName} ${worker.user.lastName}`,
+        message: 'Dispute reviewed. Blacklist decision has been upheld.',
+      }
+    }
+  }
 }

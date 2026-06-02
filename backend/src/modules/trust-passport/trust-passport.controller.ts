@@ -1,13 +1,17 @@
 import { Controller, Get, Post, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import { TrustPassportService } from './trust-passport.service'
+import { CredentialExpiryService } from './credential-expiry.service'
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard'
 import { CurrentUser, CurrentUserPayload } from '../../common/decorators/current-user.decorator'
 
 @ApiTags('Trust Passport')
 @Controller('passport')
 export class TrustPassportController {
-  constructor(private readonly trustPassportService: TrustPassportService) {}
+  constructor(
+    private readonly trustPassportService: TrustPassportService,
+    private readonly credentialExpiry: CredentialExpiryService,
+  ) {}
 
   // ── Public — no auth needed ───────────────────────────────────────────────
 
@@ -75,5 +79,22 @@ export class TrustPassportController {
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.trustPassportService.revokeCredential(credentialId, user.sub, body.reason)
+  }
+
+  @Get('credentials/expiring-soon')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Credentials expiring within 30 days — for operator dashboard alerts' })
+  getExpiringCredentials(@CurrentUser() user: CurrentUserPayload) {
+    return this.trustPassportService.getExpiringCredentials(user.institutionId)
+  }
+
+  @Post('credentials/trigger-expiry-check')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Manually trigger credential expiry check and send alerts' })
+  triggerExpiryCheck() {
+    return this.credentialExpiry.triggerCheck()
   }
 }
