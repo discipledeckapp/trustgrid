@@ -11,6 +11,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ZeptomailService } from '../../common/email/zeptomail.service';
+import { TermiiService } from '../../common/notifications/termii.service';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +20,8 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    private readonly email: ZeptomailService,
+    private readonly termii: TermiiService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -151,6 +155,116 @@ export class AuthService {
       where: { userId, revokedAt: null },
       data: { revokedAt: new Date() },
     });
+  }
+
+  async forgotPassword(identifier: string) {
+    const isEmail = identifier.includes('@')
+    const user = await this.prisma.userAccount.findFirst({
+      where: isEmail
+        ? { email: identifier.toLowerCase() }
+        : { phone: identifier },
+      include: { institution: { select: { name: true } } },
+    })
+
+    // Always return success to prevent user enumeration
+    if (!user) {
+      return { success: true, message: 'If that account exists, a reset code has been sent.' }
+    }
+
+    // Invalidate any existing OTPs
+    await this.prisma.passwordResetToken.updateMany({
+      where: { userId: user.id, usedAt: null },
+      data: { usedAt: new Date() },
+    })
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString()
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+
+    await this.prisma.passwordResetToken.create({
+      data: { userId: user.id, otp, expiresAt },
+    })
+
+    const communityName = (user as any).institution?.name ?? 'TrustGrid'
+    const message = `Your TrustGrid password reset code is: ${otp}. Valid for 10 minutes. Do not share this code.`
+
+    // Send via email if available
+    if (isEmail && user.email) {
+      await this.email.sendEmail({
+        to: user.email,
+        toName: user.firstName,
+        subject: 'TrustGrid — Password Reset Code',
+        htmlBody: `
+          <div style="font-family:Inter,Arial,sans-serif;max-width:480px;margin:0 auto;">
+            <div style="background:linear-gradient(135deg,#4F46E5,#0D9488);padding:28px 36px;border-radius:16px 16px 0 0;">
+              <h1 style="color:#fff;margin:0;font-size:20px;font-weight:900;">Password Reset</h1>
+              <p style="color:rgba(255,255,255,0.7);margin:6px 0 0;font-size:13px;">${communityName}</p>
+            </div>
+            <div style="padding:28px 36px;background:#fff;">
+              <p style="color:#1e293b;font-size:15px;">Hi <strong>${user.firstName}</strong>,</p>
+              <p style="color:#64748b;">Use the code below to reset your password. It expires in <strong>10 minutes</strong>.</p>
+              <div style="background:#f8fafc;border:2px dashed #e2e8f0;border-radius:12px;padding:20px;text-align:center;margin:20px 0;">
+                <p style="margin:0 0 4px;font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;">Reset Code</p>
+                <p style="margin:0;font-size:36px;font-weight:900;font-family:monospace;color:#1e293b;letter-spacing:0.15em;">${otp}</p>
+              </div>
+              <p style="color:#94a3b8;font-size:12px;">If you did not request this, ignore this email. Your password will not change.</p>
+            </div>
+            <div style="padding:16px 36px;background:#f8fafc;border-radius:0 0 16px 16px;text-align:center;">
+              <p style="margin:0;font-size:11px;color:#cbd5e1;">Powered by TrustGrid · trustgrid.ng</p>
+            </div>
+          </div>
+        `,
+        textBody: message,
+      }).catch(() => {})
+    }
+
+    // Send via SMS if phone
+    if (!isEmail && user.phone) {
+      await this.termii.sendSMS(user.phone, message).catch(() => {})
+    }
+
+    return { success: true, message: 'If that account exists, a reset code has been sent.' }
+  }
+
+  async resetPassword(identifier: string, otp: string, newPassword: string) {
+    if (newPassword.length < 8) {
+      throw new BadRequestException('Password must be at least 8 characters')
+    }
+
+    const isEmail = identifier.includes('@')
+    const user = await this.prisma.userAccount.findFirst({
+      where: isEmail
+        ? { email: identifier.toLowerCase() }
+        : { phone: identifier },
+    })
+
+    if (!user) throw new UnauthorizedException('Invalid or expired reset code')
+
+    const token = await this.prisma.passwordResetToken.findFirst({
+      where: {
+        userId: user.id,
+        otp,
+        usedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+    })
+
+    if (!token) throw new UnauthorizedException('Invalid or expired reset code')
+
+    // Mark token used and update password atomically
+    const newHash = await bcrypt.hash(newPassword, 12)
+    await this.prisma.$transaction([
+      this.prisma.passwordResetToken.update({
+        where: { id: token.id },
+        data: { usedAt: new Date() },
+      }),
+      this.prisma.userAccount.update({
+        where: { id: user.id },
+        data: { passwordHash: newHash },
+      }),
+    ])
+
+    return { success: true, message: 'Password updated successfully. You can now sign in.' }
   }
 
   private async generateTokens(userId: string, institutionId: string, role: string) {

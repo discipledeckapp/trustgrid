@@ -253,6 +253,7 @@ model UserAccount {
   institution     Institution    @relation(fields: [institutionId], references: [id])
   workerProfile   WorkerProfile?
   refreshTokens   RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
   auditLogs       AuditLog[]
 
   @@unique([institutionId, phone])
@@ -271,6 +272,20 @@ model RefreshToken {
   user UserAccount @relation(fields: [userId], references: [id])
 
   @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  otp       String    // 6-digit code
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user      UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
 }
 
 // ═══════════════════════════════════════════════════════

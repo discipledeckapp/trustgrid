@@ -55,6 +55,20 @@ export class AuthController {
     await this.authService.logout(req.user.sub);
   }
 
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset OTP via email or SMS' })
+  async forgotPassword(@Body() body: { identifier: string }) {
+    return this.authService.forgotPassword(body.identifier)
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password with OTP' })
+  async resetPassword(@Body() body: { identifier: string; otp: string; newPassword: string }) {
+    return this.authService.resetPassword(body.identifier, body.otp, body.newPassword)
+  }
+
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
