@@ -41,6 +41,7 @@ export default function BrandingPage() {
   const [primaryColor, setPrimaryColor] = useState('#4F46E5')
   const [accentColor, setAccentColor] = useState('#0D9488')
   const [logoUrl, setLogoUrl] = useState('')
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState('')
   const [copied, setCopied] = useState(false)
   const [saved, setSaved] = useState(false)
 
@@ -55,6 +56,7 @@ export default function BrandingPage() {
       setPrimaryColor(institution.brandConfig?.primaryColor ?? '#4F46E5')
       setAccentColor(institution.brandConfig?.accentColor ?? '#0D9488')
       setLogoUrl(institution.brandConfig?.logoUrl ?? '')
+      setBackgroundImageUrl((institution.brandConfig as any)?.backgroundImageUrl ?? '')
     }
   }, [institution])
 
@@ -79,6 +81,7 @@ export default function BrandingPage() {
         primaryColor,
         accentColor,
         logoUrl: logoUrl || undefined,
+        backgroundImageUrl: backgroundImageUrl || undefined,
       },
     })
   }
@@ -362,6 +365,28 @@ export default function BrandingPage() {
                 <p className="text-xs text-gray-400 mt-1.5">
                   Recommended: transparent PNG, minimum 200×60 px, under 500 KB.
                 </p>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Login / Signup Background Image
+                </label>
+                <input
+                  type="url"
+                  value={backgroundImageUrl}
+                  onChange={e => setBackgroundImageUrl(e.target.value)}
+                  placeholder="https://yourorg.com/background.jpg"
+                  className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                />
+                <p className="text-xs text-gray-400 mt-1.5">
+                  Shown behind the login and signup forms. Your brand colors are overlaid on top. Use a high-quality image (min 1920×1080 px).
+                </p>
+                {backgroundImageUrl && (
+                  <div className="mt-2 rounded-xl overflow-hidden h-20 relative">
+                    <img src={backgroundImageUrl} alt="Background preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-indigo-900/60" />
+                    <p className="absolute inset-0 flex items-center justify-center text-white text-xs font-semibold">Preview</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

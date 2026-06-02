@@ -153,6 +153,12 @@ enum WorkerType {
   INTERN
 }
 
+enum JoinPolicy {
+  OPEN
+  REQUEST
+  INVITE_ONLY
+}
+
 // ═══════════════════════════════════════════════════════
 // INSTITUTION (TENANT)
 // ═══════════════════════════════════════════════════════
@@ -219,6 +225,9 @@ model InstitutionConfig {
   escalationRules     Json @default("{}")
   serviceZones        Json @default("[]")
   notificationChannels Json @default("{}")
+
+  joinPolicy      JoinPolicy @default(REQUEST)
+  allowSelfSignup Boolean    @default(true)
 
   primaryColor  String?
   customDomain  String?

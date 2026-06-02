@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useInstitutionConfig, useUpdateConfig } from '@/hooks/useApi'
-import { Save, Settings, Sliders, Tag, Shield, Bell, RefreshCw, Palette, ChevronRight } from 'lucide-react'
+import { Save, Settings, Sliders, Tag, Shield, Bell, RefreshCw, Palette, ChevronRight, Users } from 'lucide-react'
 
 const DEFAULT_WEIGHTS = {
   account_created: 5,
@@ -111,6 +111,20 @@ export default function SettingsPage() {
           </p>
         </div>
         <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors shrink-0" />
+      </Link>
+
+      <Link href="/settings/join-policy"
+        className="flex items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 hover:border-indigo-200 transition-colors group mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center">
+            <Users className="w-5 h-5 text-indigo-600" />
+          </div>
+          <div>
+            <p className="font-semibold text-gray-900 text-sm">Join Policy</p>
+            <p className="text-xs text-gray-500">Control how new members join and bulk import residents</p>
+          </div>
+        </div>
+        <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-500 transition-colors" />
       </Link>
 
       <div className="flex items-center justify-between mb-8">

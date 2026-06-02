@@ -5,6 +5,8 @@ export interface BrandConfig {
   accentColor?: string
   logoUrl?: string
   faviconUrl?: string
+  backgroundImageUrl?: string      // auth page background image
+  backgroundOverlayOpacity?: number // 0–1, default 0.65
   poweredByVisible?: boolean
   appName?: string
 }

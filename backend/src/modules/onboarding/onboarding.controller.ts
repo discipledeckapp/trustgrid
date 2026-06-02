@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Body, Param,
-  Query, UseGuards, HttpCode, HttpStatus,
+  Query, UseGuards, HttpCode, HttpStatus, Patch,
 } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
 import {
@@ -147,5 +147,16 @@ export class OnboardingController {
     @CurrentUser() user: CurrentUserPayload,
   ) {
     return this.onboardingService.reviewApplication(id, user.institutionId, dto, user.sub)
+  }
+
+  @Post('bulk-import')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Bulk import members from CSV data' })
+  bulkImport(
+    @Body() body: { members: Array<{ firstName: string; lastName: string; phone?: string; email?: string }> },
+    @CurrentUser() user: CurrentUserPayload,
+  ) {
+    return this.onboardingService.bulkImport(body.members, user.institutionId, user.sub)
   }
 }

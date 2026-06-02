@@ -472,4 +472,46 @@ export class OnboardingService {
     if (app.status === 'ACTIVE') throw new BadRequestException('Application is already active')
     if (app.status === 'REJECTED') throw new BadRequestException('Application was rejected')
   }
+
+  // ── Bulk Import ─────────────────────────────────────────────────────────────
+
+  async bulkImport(
+    members: Array<{ firstName: string; lastName: string; phone?: string; email?: string }>,
+    institutionId: string,
+    importedById: string,
+  ) {
+    let imported = 0
+    let skipped = 0
+
+    for (const m of members) {
+      if (!m.firstName || (!m.phone && !m.email)) { skipped++; continue }
+
+      // Check if already exists
+      const existing = await this.prisma.userAccount.findFirst({
+        where: {
+          institutionId,
+          OR: [
+            ...(m.phone ? [{ phone: m.phone }] : []),
+            ...(m.email ? [{ email: m.email.toLowerCase() }] : []),
+          ],
+        },
+      })
+
+      if (existing) { skipped++; continue }
+
+      await this.prisma.userAccount.create({
+        data: {
+          institutionId,
+          firstName: m.firstName,
+          lastName: m.lastName ?? '',
+          phone: m.phone ?? `IMPORT-${Date.now()}-${Math.random()}`,
+          email: m.email?.toLowerCase(),
+          role: 'RESIDENT',
+        },
+      })
+      imported++
+    }
+
+    return { imported, skipped, total: members.length }
+  }
 }

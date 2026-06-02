@@ -59,9 +59,11 @@ export default function LoginPage() {
   const [error, setError] = useState('')
 
   const { effective, found, name } = useBrand()
-  const communityName = name ?? effective.displayName ?? 'TrustGrid'
-  const primaryColor  = effective.primaryColor ?? '#1e1b4b'
-  const accentColor   = effective.accentColor  ?? '#0d4b45'
+  const communityName  = name ?? effective.displayName ?? 'TrustGrid'
+  const primaryColor   = effective.primaryColor ?? '#1e1b4b'
+  const accentColor    = effective.accentColor  ?? '#0d4b45'
+  const bgImage        = effective.backgroundImageUrl
+  const overlayOpacity = effective.backgroundOverlayOpacity ?? 0.65
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -83,13 +85,24 @@ export default function LoginPage() {
     }
   }
 
+  const bgStyle = bgImage
+    ? {
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        position: 'relative' as const,
+      }
+    : { background: `linear-gradient(135deg, ${primaryColor} 0%, #0f172a 60%, ${accentColor} 100%)` }
+
   return (
-    <div
-      className="min-h-screen flex"
-      style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, #0f172a 60%, ${accentColor} 100%)` }}
-    >
+    <div className="min-h-screen flex" style={bgStyle}>
+      {/* Dark overlay when background image is set */}
+      {bgImage && (
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: `linear-gradient(135deg, ${primaryColor}cc 0%, rgba(15,23,42,${overlayOpacity}) 60%, ${accentColor}cc 100%)` }} />
+      )}
       {/* Left side — community brand story */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 p-16">
+      <div className="hidden lg:flex flex-col justify-between w-1/2 p-16 relative z-10">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.12)' }}>
             <NetworkGMarkWhite size={26} />
@@ -112,7 +125,8 @@ export default function LoginPage() {
       </div>
 
       {/* Right side — login form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
+      {/* z-10 ensures form appears above the background overlay */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10">
         <div className="w-full max-w-md">
           {/* Logo — mobile only */}
           <div className="text-center mb-8 lg:hidden">

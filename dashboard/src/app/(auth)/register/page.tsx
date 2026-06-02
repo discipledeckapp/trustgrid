@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, ArrowLeft, ArrowRight, CheckCircle, Building2 } from 'lucide-react'
 import { api, saveAuth } from '@/lib/api'
+import { useBrand } from '@/hooks/useBrand'
 
 const INSTITUTION_TYPES = [
   { value: 'CHURCH',              label: 'Church / Religious Network' },
@@ -22,6 +23,13 @@ type Step = 1 | 2 | 3
 
 export default function RegisterPage() {
   const router = useRouter()
+  const { effective, found, name } = useBrand()
+  const communityName  = name ?? effective.displayName ?? 'TrustGrid'
+  const primaryColor   = effective.primaryColor ?? '#4F46E5'
+  const accentColor    = effective.accentColor  ?? '#0D9488'
+  const bgImage        = effective.backgroundImageUrl
+  const overlayOpacity = effective.backgroundOverlayOpacity ?? 0.65
+
   const [step, setStep] = useState<Step>(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -67,11 +75,23 @@ export default function RegisterPage() {
     }
   }
 
-  const bgStyle = { background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 60%, #0d4b45 100%)' }
+  const bgStyle = bgImage
+    ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' as const }
+    : { background: `linear-gradient(135deg, ${primaryColor} 0%, #0f172a 60%, ${accentColor} 100%)` }
 
   const Card = ({ children }: { children: React.ReactNode }) => (
     <div className="min-h-screen flex items-center justify-center p-6" style={bgStyle}>
-      <div className="w-full max-w-md">
+      {bgImage && (
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: `linear-gradient(135deg, ${primaryColor}cc 0%, rgba(15,23,42,${overlayOpacity}) 60%, ${accentColor}cc 100%)` }} />
+      )}
+      <div className="w-full max-w-md relative z-10">
+        {/* Community name banner */}
+        {found && (
+          <div className="text-center mb-4">
+            <p className="text-white/70 text-sm font-semibold">{communityName}</p>
+          </div>
+        )}
         <div className="flex items-center justify-between mb-6">
           <Link href="/login" className="inline-flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to sign in
