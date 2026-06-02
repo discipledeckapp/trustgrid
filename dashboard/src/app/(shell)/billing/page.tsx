@@ -96,7 +96,7 @@ export default function BillingPage() {
                   <p className="text-2xl font-black text-indigo-600 mt-1">Custom</p>
                 ) : (
                   <div className="mt-1">
-                    <span className="text-2xl font-black text-gray-900">₦{plan.amountNGN.toLocaleString()}</span>
+                    <span className="text-2xl font-black text-gray-900">₦{(plan.amountNGN ?? 0).toLocaleString()}</span>
                     <span className="text-gray-400 text-xs">/month</span>
                   </div>
                 )}
@@ -149,7 +149,7 @@ export default function BillingPage() {
                   <p className="font-semibold text-gray-900 text-sm">{fee.name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-black text-gray-900">₦{fee.amountNGN.toLocaleString()}</p>
+                  <p className="font-black text-gray-900">₦{(fee.amountNGN ?? 0).toLocaleString()}</p>
                   <p className="text-xs text-gray-400">one-time</p>
                 </div>
               </div>
@@ -168,7 +168,7 @@ export default function BillingPage() {
                   <p className="font-semibold text-gray-900 text-sm">{fee.name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-black text-gray-900">₦{fee.amountNGN.toLocaleString()}</p>
+                  <p className="font-black text-gray-900">₦{(fee.amountNGN ?? 0).toLocaleString()}</p>
                   <p className="text-xs text-gray-400">per event</p>
                 </div>
               </div>

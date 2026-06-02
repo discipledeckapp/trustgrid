@@ -103,7 +103,18 @@ export class AnalyticsService {
           trustGradeColor: grade.color,
           totalDeployments: w.totalDeployments,
           averageRating: w.averageRating,
+          verificationStatus: w.verificationStatus,
         };
+      }),
+      trustedOrganisations: await this.prisma.organisation.findMany({
+        where: { institutionId, verificationStatus: 'VERIFIED' },
+        select: {
+          id: true, name: true, type: true, logoUrl: true,
+          rcNumber: true, verifiedAt: true,
+          _count: { select: { workers: true } },
+        },
+        orderBy: { verifiedAt: 'desc' },
+        take: 6,
       }),
       recentActivity: recentActivity.map(e => ({
         id: e.id,

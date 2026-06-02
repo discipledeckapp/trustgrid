@@ -47,9 +47,17 @@ export default function WorkerProfilePage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             {/* Avatar with verification overlay */}
             <div className="relative shrink-0">
-              <div className="w-24 h-24 rounded-2xl bg-white/20 backdrop-blur border border-white/20 flex items-center justify-center text-4xl font-black text-white">
-                {worker.firstName[0]}
-              </div>
+              {worker.profilePhotoUrl ? (
+                <img
+                  src={worker.profilePhotoUrl}
+                  alt={`${worker.firstName} ${worker.lastName}`}
+                  className="w-24 h-24 rounded-2xl object-cover border-2 border-white/20"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-2xl bg-white/20 backdrop-blur border border-white/20 flex items-center justify-center text-4xl font-black text-white">
+                  {worker.firstName[0]}
+                </div>
+              )}
               {worker.identityVerified && (
                 <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center border-2 border-white shadow-md">
                   <ShieldCheck className="w-4 h-4 text-white" />

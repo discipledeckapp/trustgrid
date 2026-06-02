@@ -316,6 +316,20 @@ async function seed() {
 
   // Create admin user
   const passwordHash = await bcrypt.hash('Admin123!', 12);
+  await prisma.userAccount.create({
+    data: {
+      institutionId: institution.id,
+      firstName: 'Platform',
+      lastName: 'Admin',
+      phone: '08001234569',
+      email: 'admin@trustgrid.ng',
+      role: 'PLATFORM_ADMIN',
+      passwordHash,
+      phoneVerified: true,
+      emailVerified: true,
+    },
+  });
+
   const adminUser = await prisma.userAccount.create({
     data: {
       institutionId: institution.id,
@@ -506,6 +520,36 @@ async function seed() {
 
   console.log('✓ Added incidents');
 
+  // ── Seed verified organisations ────────────────────────────────────────────
+  const DEMO_ORGS = [
+    { name: 'Emeka Electrical Ltd',        type: 'LIMITED_LIABILITY',  rcNumber: 'RC123456' },
+    { name: 'Grace Security Services',     type: 'SECURITY_COMPANY',   rcNumber: 'RC234567' },
+    { name: 'Providence Catering Co.',     type: 'LIMITED_LIABILITY',  rcNumber: 'RC345678' },
+    { name: 'Bright Horizon Cleaners',     type: 'CLEANING_COMPANY',   rcNumber: 'RC456789' },
+    { name: 'TechServ IT Solutions',       type: 'LIMITED_LIABILITY',  rcNumber: 'RC567890' },
+  ]
+
+  for (const org of DEMO_ORGS) {
+    const existing = await prisma.organisation.findFirst({
+      where: { institutionId: institution.id, name: org.name },
+    })
+    if (!existing) {
+      await prisma.organisation.create({
+        data: {
+          institutionId: institution.id,
+          name: org.name,
+          slug: `${org.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${institution.id.slice(-4)}`,
+          type: org.type as any,
+          phone: '08001234567',
+          rcNumber: org.rcNumber,
+          verificationStatus: 'FULLY_VERIFIED' as any,
+          onboardingStatus: 'APPROVED' as any,
+        },
+      })
+    }
+  }
+  console.log('✓ Seeded verified organisations');
+
   // Create the convention service request
   const serviceRequest = await prisma.serviceRequest.create({
     data: {
@@ -679,6 +723,7 @@ async function seed() {
   console.log(`   Institution: ${institution.name}`);
   console.log('');
   console.log('👥 ALL USER TYPE CREDENTIALS (password: Admin123! for all):');
+  console.log('   PLATFORM_ADMIN:       08001234569 / admin@trustgrid.ng  (TrustGrid super admin)');
   console.log('   INSTITUTION_ADMIN:    08001234567  (Deacon Emeka — Redemption City, full access)');
   console.log('   INSTITUTION_OPERATOR: 08001234568  (Sister Adaeze — Redemption City, day-to-day ops)');
   console.log('   WORKER (artisan):     08001234570  (Chukwuemeka — electrician, A+ grade)');

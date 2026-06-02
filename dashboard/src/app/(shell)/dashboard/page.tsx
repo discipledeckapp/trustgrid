@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { api } from '@/lib/api'
 import {
   Users, ShieldCheck, Star, AlertTriangle,
-  ArrowRight, RefreshCw, Zap,
+  ArrowRight, RefreshCw, Zap, Building2,
 } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
 import { EmergencyModal } from '@/components/ui/emergency-modal'
@@ -36,7 +36,8 @@ export default function DashboardPage() {
   const w  = data?.workforce        ?? {}
   const sr = data?.serviceRequests  ?? {}
   const inc = data?.incidents       ?? {}
-  const topWorkers = data?.topWorkers ?? []
+  const topWorkers          = data?.topWorkers ?? []
+  const trustedOrganisations = data?.trustedOrganisations ?? []
   const activity = data?.recentActivity ?? []
 
   const hour = new Date().getHours()
@@ -250,10 +251,18 @@ export default function DashboardPage() {
                     )}>
                       {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
                     </div>
-                    {/* Avatar */}
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-xl font-black text-blue-700 mb-3 group-hover:scale-105 transition-transform">
-                      {(w.name ?? w.firstName ?? '?')[0]}
-                    </div>
+                    {/* Avatar — show photo when available, fall back to initial */}
+                    {w.profilePhotoUrl ? (
+                      <img
+                        src={w.profilePhotoUrl}
+                        alt={w.name ?? w.firstName}
+                        className="w-14 h-14 rounded-2xl object-cover mb-3 group-hover:scale-105 transition-transform border border-gray-100"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-xl font-black text-blue-700 mb-3 group-hover:scale-105 transition-transform">
+                        {(w.name ?? w.firstName ?? '?')[0]}
+                      </div>
+                    )}
                     <p className="text-sm font-bold text-gray-900 leading-tight truncate w-full">
                       {w.name ?? `${w.firstName} ${w.lastName}`}
                     </p>
@@ -267,6 +276,43 @@ export default function DashboardPage() {
                 </Link>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Trusted Organisations */}
+      {trustedOrganisations.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base font-black text-gray-900 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-indigo-600" /> Trusted Organisations
+              </h2>
+              <p className="text-xs text-gray-400 mt-0.5">CAC-verified organisations in your registry</p>
+            </div>
+            <Link href="/organisations" className="text-xs text-indigo-600 font-semibold hover:underline flex items-center gap-1">
+              See all <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {trustedOrganisations.map((org: any) => (
+              <div key={org.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                {org.logoUrl ? (
+                  <img src={org.logoUrl} alt={org.name} className="w-10 h-10 rounded-xl object-cover border border-gray-100 shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+                    <Building2 className="w-5 h-5 text-indigo-500" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{org.name}</p>
+                  <p className="text-xs text-gray-400 truncate">{org.type?.replace(/_/g, ' ')} · {org._count?.workers ?? 0} workers</p>
+                </div>
+                <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-bold shrink-0">
+                  ✓ Verified
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       )}
