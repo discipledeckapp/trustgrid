@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { GoogleAuthService } from './google-auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto, RefreshTokenDto } from './dto/login.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -20,7 +21,10 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 @Controller('auth')
 
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly googleAuth: GoogleAuthService,
+  ) {}
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new institution and admin account' })
@@ -53,6 +57,20 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout and revoke refresh tokens' })
   async logout(@Req() req: any) {
     await this.authService.logout(req.user.sub);
+  }
+
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Sign in or register with Google ID token' })
+  async googleLogin(@Body() body: { credential: string }) {
+    return this.googleAuth.loginWithGoogle(body.credential)
+  }
+
+  @Post('google-userinfo')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Sign in or register with verified Google user info (email, name, picture)' })
+  async googleUserInfo(@Body() body: { email: string; firstName: string; lastName: string; picture?: string; googleId: string }) {
+    return this.googleAuth.loginWithGoogleUserInfo(body)
   }
 
   @Post('forgot-password')
