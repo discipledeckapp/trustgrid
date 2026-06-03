@@ -66,7 +66,7 @@ function PassportMockup() {
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden pt-16 bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+    <section className="relative min-h-screen flex items-center overflow-hidden pt-16 bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 dark:from-slate-950 dark:via-[#0A0A0F] dark:to-indigo-950/20">
       <div className="absolute top-20 left-1/4 w-96 h-96 bg-indigo-100 rounded-full blur-3xl pointer-events-none opacity-60" />
       <div className="absolute bottom-20 right-1/4 w-80 h-80 bg-teal-100 rounded-full blur-3xl pointer-events-none opacity-50" />
 
@@ -78,12 +78,12 @@ export default function Hero() {
               Built for Nigerian Institutions
             </div>
 
-            <h1 className="text-5xl lg:text-6xl font-black leading-[1.08] tracking-tight mb-6 text-slate-900">
+            <h1 className="text-5xl lg:text-6xl font-black leading-[1.08] tracking-tight mb-6 text-slate-900 dark:text-white">
               The Trust Layer<br />
               <span className="text-gradient">Communities Need</span>
             </h1>
 
-            <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-lg">
+            <p className="text-lg text-slate-600 dark:text-white/60 leading-relaxed mb-8 max-w-lg">
               TrustGrid gives estates, churches, schools, and smart cities the infrastructure to verify, deploy, and govern trusted service workers — turning WhatsApp chaos into permanent institutional accountability.
             </p>
 
@@ -93,7 +93,7 @@ export default function Hero() {
                 { icon: '⭐', text: 'Algorithmic trust scores' },
                 { icon: '🏛️', text: 'Built for institutions' },
               ].map(({ icon, text }) => (
-                <div key={text} className="flex items-center gap-2 text-sm text-slate-500">
+                <div key={text} className="flex items-center gap-2 text-sm text-slate-500 dark:text-white/50">
                   <span>{icon}</span>
                   <span>{text}</span>
                 </div>
@@ -108,7 +108,7 @@ export default function Hero() {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </a>
               <a href="https://app.trustgrid.ng/login"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold text-slate-600 border border-slate-200 hover:border-slate-300 hover:text-slate-900 hover:bg-slate-50 transition-all">
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-white/60 border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
                 View Live Demo →
               </a>
             </div>

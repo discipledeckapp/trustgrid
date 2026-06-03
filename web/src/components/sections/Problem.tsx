@@ -1,20 +1,20 @@
 export default function Problem() {
   return (
-    <section id="problem" className="py-24 px-6 bg-white">
+    <section id="problem" className="py-24 px-6 bg-white dark:bg-[#0F0F1A]">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
-          <span className="text-indigo-600 text-sm font-semibold uppercase tracking-widest">The Problem</span>
-          <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-3 leading-tight">
+          <span className="text-indigo-600 dark:text-indigo-400 text-sm font-semibold uppercase tracking-widest">The Problem</span>
+          <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mt-3 leading-tight">
             Your workers are managed<br />
             <span className="text-gradient">on WhatsApp. That is not enough.</span>
           </h2>
-          <p className="text-slate-500 text-lg mt-4 max-w-2xl mx-auto">
+          <p className="text-slate-500 dark:text-white/50 text-lg mt-4 max-w-2xl mx-auto">
             Every estate, church, school, and event organiser in Nigeria already knows service workers. The problem is not finding them. The problem is knowing who to trust.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6 mb-16">
-          <div className="rounded-2xl p-6 border border-red-100 bg-red-50/50">
+          <div className="rounded-2xl p-6 border border-red-100 dark:border-red-500/10 bg-red-50/50 dark:bg-red-500/5">
             <div className="text-sm text-red-500 font-semibold uppercase tracking-widest mb-4">How institutions manage today</div>
             <div className="space-y-3">
               {[
@@ -37,7 +37,7 @@ export default function Problem() {
             </div>
           </div>
 
-          <div className="rounded-2xl p-6 border border-slate-200 bg-slate-50">
+          <div className="rounded-2xl p-6 border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/3">
             <div className="text-sm text-slate-400 font-semibold uppercase tracking-widest mb-4">Questions you cannot answer today</div>
             <div className="space-y-3">
               {[
@@ -57,9 +57,9 @@ export default function Problem() {
           </div>
         </div>
 
-        <div className="rounded-2xl p-8 text-center relative overflow-hidden border border-indigo-100 bg-gradient-to-br from-indigo-50 to-teal-50">
+        <div className="rounded-2xl p-8 text-center relative overflow-hidden border border-indigo-100 dark:border-indigo-500/20 bg-gradient-to-br from-indigo-50 to-teal-50 dark:from-indigo-500/5 dark:to-teal-500/5">
           <div className="text-4xl mb-4">⚡</div>
-          <p className="text-xl font-bold text-slate-900 mb-2">
+          <p className="text-xl font-bold text-slate-900 dark:text-white mb-2">
             One unvetted worker incident can cost an institution<br className="hidden md:block" /> more than a year of TrustGrid.
           </p>
           <p className="text-slate-500 text-sm">

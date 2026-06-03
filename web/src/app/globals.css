@@ -7,6 +7,7 @@
 @layer base {
   html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
   body { font-family: 'Inter', system-ui, sans-serif; background: #FFFFFF; color: #0F172A; }
+  .dark body { background: #0A0A0F; color: #F8FAFC; }
   h1,h2,h3,h4 { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
 }
 
@@ -26,12 +27,12 @@
   .bg-brand-gradient { background: linear-gradient(135deg, #4F46E5 0%, #0D9488 100%); }
   .border-gradient {
     border: 1px solid transparent;
-    background: linear-gradient(#FFFFFF, #FFFFFF) padding-box,
+    background: linear-gradient(var(--card-bg, #FFFFFF), var(--card-bg, #FFFFFF)) padding-box,
                 linear-gradient(135deg, rgba(79,70,229,0.3), rgba(13,148,136,0.3)) border-box;
   }
 }
 
-/* Mesh gradient background — light version */
+/* ── Light mode mesh bg ───────────────────────────────────── */
 .mesh-bg {
   background:
     radial-gradient(ellipse 80% 60% at 20% 0%, rgba(79,70,229,0.05) 0%, transparent 60%),
@@ -39,7 +40,15 @@
     #F8FAFC;
 }
 
-/* Card glass effect — light version */
+/* ── Dark mode mesh bg ────────────────────────────────────── */
+.dark .mesh-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(79,70,229,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 100%, rgba(13,148,136,0.12) 0%, transparent 60%),
+    #0A0A0F;
+}
+
+/* ── Light glass card ─────────────────────────────────────── */
 .glass {
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
@@ -50,10 +59,23 @@
   box-shadow: 0 4px 12px rgba(79,70,229,0.08);
 }
 
+/* ── Dark glass card ──────────────────────────────────────── */
+.dark .glass {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: none;
+}
+.dark .glass-hover:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(79,70,229,0.3);
+  box-shadow: none;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 99px; }
+.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
 
 /* Fade up animation */
 @keyframes fade-up {
@@ -65,7 +87,6 @@
 .delay-200 { animation-delay: 0.2s; }
 .delay-300 { animation-delay: 0.3s; }
 
-/* Pulse glow */
 @keyframes pulse-glow {
   0%,100% { opacity: 0.6; }
   50%      { opacity: 1; }
