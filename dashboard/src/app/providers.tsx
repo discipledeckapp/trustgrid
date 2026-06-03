@@ -9,9 +9,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () => new QueryClient({ defaultOptions: { queries: { retry: 1, staleTime: 30_000 } } }),
   )
+
+  const inner = (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
+
+  // Only wrap with GoogleOAuthProvider when a client ID is actually configured.
+  // An empty clientId causes useGoogleOAuth() to throw inside GoogleSignInButton
+  // which crashes the entire app via the global error boundary.
+  if (!GOOGLE_CLIENT_ID) return inner
+
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      {inner}
     </GoogleOAuthProvider>
   )
 }

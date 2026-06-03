@@ -9,6 +9,8 @@ interface Props {
   onNewUser?: (profile: { email: string; firstName: string; lastName: string; picture?: string }) => void
 }
 
+const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ''
+
 export function GoogleSignInButton({ label = 'Continue with Google', onNewUser }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -20,12 +22,10 @@ export function GoogleSignInButton({ label = 'Continue with Google', onNewUser }
       setLoading(true)
       setError('')
       try {
-        // Exchange access token for user info, then send to our backend
         const userInfo = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
           headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
         }).then(r => r.json())
 
-        // POST to our backend with the user info
         const { data } = await api.post('/auth/google-userinfo', {
           email: userInfo.email,
           firstName: userInfo.given_name ?? '',
@@ -35,7 +35,6 @@ export function GoogleSignInButton({ label = 'Continue with Google', onNewUser }
         })
 
         if (data.isNewUser) {
-          // Pass profile data to parent so it can pre-fill the registration form
           onNewUser?.({
             email: data.googleProfile.email,
             firstName: data.googleProfile.firstName,
@@ -55,9 +54,7 @@ export function GoogleSignInButton({ label = 'Continue with Google', onNewUser }
     onError: () => setError('Google sign-in was cancelled or failed.'),
   })
 
-  const isConfigured = !!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
-
-  if (!isConfigured) {
+  if (!CLIENT_ID) {
     return (
       <button type="button" disabled
         className="w-full flex items-center justify-center gap-3 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-gray-400 bg-gray-50 cursor-not-allowed">
