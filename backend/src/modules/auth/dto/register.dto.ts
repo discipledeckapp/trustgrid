@@ -1,4 +1,6 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength, Matches } from 'class-validator';
+import { ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { InstitutionType } from '@prisma/client';
 
@@ -35,7 +37,7 @@ export class RegisterAdminDto {
 
   @ApiProperty({ example: '+2348001234567' })
   @IsString()
-  @Matches(/^\+?[1-9]\d{1,14}$/, { message: 'phone must be a valid international number' })
+  @Matches(/^\+?[0-9]{7,15}$/, { message: 'phone must be a valid number' })
   phone: string;
 
   @ApiPropertyOptional({ example: 'admin@redemptioncity.ng' })
@@ -47,12 +49,21 @@ export class RegisterAdminDto {
   @IsString()
   @MinLength(8)
   password: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  role?: string;
 }
 
 export class RegisterDto {
   @ApiProperty()
+  @ValidateNested()
+  @Type(() => RegisterInstitutionDto)
   institution: RegisterInstitutionDto;
 
   @ApiProperty()
+  @ValidateNested()
+  @Type(() => RegisterAdminDto)
   admin: RegisterAdminDto;
 }

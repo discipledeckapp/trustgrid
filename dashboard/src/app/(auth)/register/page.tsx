@@ -188,14 +188,17 @@ export default function RegisterPage() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone number</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Phone number <span className="text-indigo-600 text-xs font-normal">— used to sign in</span>
+          </label>
           <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
             placeholder="08001234567"
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" required />
+          <p className="text-xs text-gray-400 mt-1">This is your login identifier. Keep it safe.</p>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Email <span className="text-gray-400 font-normal">(optional)</span>
+            Email <span className="text-gray-400 font-normal">(optional — also usable to sign in)</span>
           </label>
           <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)}
             placeholder="you@example.com"
@@ -213,6 +216,13 @@ export default function RegisterPage() {
             </button>
           </div>
         </div>
+
+        <div className="bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 text-xs text-indigo-700">
+          <strong>Login summary:</strong> You will sign in to{' '}
+          <strong>app.trustgrid.ng/login</strong> using your phone number
+          {adminEmail ? ` or email (${adminEmail})` : ''} and the password you set here.
+        </div>
+
         <button type="submit"
           className="w-full text-white py-3.5 rounded-xl font-bold hover:opacity-90 flex items-center justify-center gap-2"
           style={btnStyle}>

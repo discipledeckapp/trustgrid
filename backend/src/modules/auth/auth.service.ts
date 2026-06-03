@@ -27,15 +27,34 @@ export class AuthService {
   async register(dto: RegisterDto) {
     const { institution: instDto, admin: adminDto } = dto;
 
-    const existing = await this.prisma.institution.findUnique({
+    // Check institution email uniqueness
+    const existingInst = await this.prisma.institution.findUnique({
       where: { email: instDto.email },
     });
-    if (existing) {
-      throw new ConflictException('Institution with this email already exists');
+    if (existingInst) {
+      throw new ConflictException('An institution with this email already exists');
+    }
+
+    // Check admin phone uniqueness (global — phone must be unique across all users)
+    const phoneNorm = adminDto.phone.trim();
+    const existingPhone = await this.prisma.userAccount.findFirst({
+      where: { phone: phoneNorm },
+    });
+    if (existingPhone) {
+      throw new ConflictException('An account with this phone number already exists. Sign in instead.');
+    }
+
+    // Check admin email uniqueness (if provided)
+    if (adminDto.email) {
+      const existingEmail = await this.prisma.userAccount.findFirst({
+        where: { email: adminDto.email.toLowerCase().trim() },
+      });
+      if (existingEmail) {
+        throw new ConflictException('An account with this email already exists. Sign in instead.');
+      }
     }
 
     const slug = this.generateSlug(instDto.name);
-
     const passwordHash = await bcrypt.hash(adminDto.password, 12);
 
     const institution = await this.prisma.institution.create({
@@ -59,8 +78,8 @@ export class AuthService {
         institutionId: institution.id,
         firstName: adminDto.firstName,
         lastName: adminDto.lastName,
-        phone: adminDto.phone,
-        email: adminDto.email,
+        phone: phoneNorm,
+        email: adminDto.email ? adminDto.email.toLowerCase().trim() : null,
         role: 'INSTITUTION_ADMIN',
         passwordHash,
       },
@@ -68,9 +87,32 @@ export class AuthService {
 
     const tokens = await this.generateTokens(user.id, institution.id, user.role);
 
+    // Send welcome email to admin if they provided an email
+    if (user.email) {
+      this.email.sendWelcome({
+        to: user.email,
+        firstName: user.firstName,
+        communityName: institution.name,
+      }).catch(() => {/* non-fatal */});
+    }
+
+    // Send welcome SMS to admin phone
+    this.termii.sendSMS(
+      user.phone,
+      `Welcome to TrustGrid, ${user.firstName}! Your institution "${institution.name}" is now set up. Sign in at app.trustgrid.ng using your phone or email and the password you just created.`,
+    ).catch(() => {/* non-fatal */});
+
     return {
       institution: { id: institution.id, name: institution.name, slug: institution.slug },
-      user: { id: user.id, email: user.email, firstName: user.firstName, role: user.role },
+      user: {
+        id: user.id,
+        email: user.email,
+        phone: user.phone,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        institutionId: institution.id,
+      },
       tokens,
     };
   }
