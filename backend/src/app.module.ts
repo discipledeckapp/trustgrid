@@ -33,6 +33,7 @@ import { AuthorityModule } from './modules/authority/authority.module'
 import { TrustPassportModule } from './modules/trust-passport/trust-passport.module'
 import { OpportunitiesModule } from './modules/opportunities/opportunities.module'
 import { AdminModule } from './modules/admin/admin.module'
+import { DemoRequestsModule } from './modules/demo-requests/demo-requests.module'
 import { pinoLoggerConfig } from './common/logger/logger.config'
 
 @Module({
@@ -85,6 +86,7 @@ import { pinoLoggerConfig } from './common/logger/logger.config'
     TrustPassportModule,
     OpportunitiesModule,
     AdminModule,
+    DemoRequestsModule,
   ],
 })
 export class AppModule {}

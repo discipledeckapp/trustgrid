@@ -121,24 +121,24 @@ export default function Demo() {
   const [activeTab, setActiveTab] = useState<Tab>('Dashboard')
 
   return (
-    <section className="py-24 px-6 mesh-bg">
+    <section className="py-24 px-6 bg-slate-50">
       <div className="max-w-6xl mx-auto">
         {/* Section heading */}
         <div className="text-center mb-12">
-          <span className="text-indigo-400 text-sm font-semibold uppercase tracking-widest">
+          <span className="text-indigo-600 text-sm font-semibold uppercase tracking-widest">
             Product Preview
           </span>
-          <h2 className="text-4xl md:text-5xl font-black text-white mt-3 mb-4">
+          <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-3 mb-4">
             See TrustGrid in action
           </h2>
-          <p className="text-white/50 max-w-xl mx-auto leading-relaxed">
+          <p className="text-slate-500 max-w-xl mx-auto leading-relaxed">
             A purpose-built platform for community workforce governance — every screen designed around operational speed and trust.
           </p>
         </div>
 
         {/* Tab pills */}
         <div className="flex justify-center mb-8">
-          <div className="inline-flex rounded-full p-1" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="inline-flex rounded-full p-1 bg-slate-200 border border-slate-300">
             {TABS.map((tab) => (
               <button
                 key={tab}
@@ -146,7 +146,8 @@ export default function Demo() {
                 className="px-5 py-2 rounded-full text-sm font-semibold transition-all"
                 style={{
                   background: activeTab === tab ? '#fff' : 'transparent',
-                  color: activeTab === tab ? '#0A0A0F' : 'rgba(255,255,255,0.55)',
+                  color: activeTab === tab ? '#0F172A' : '#64748B',
+                  boxShadow: activeTab === tab ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                 }}
               >
                 {tab}
@@ -361,21 +362,21 @@ export default function Demo() {
 
               {/* Explanatory text */}
               <div className="flex-1 pt-4">
-                <h3 className="text-2xl font-black text-white mb-3">The worker&apos;s digital identity</h3>
-                <p className="text-white/50 text-sm leading-relaxed mb-6">
+                <h3 className="text-2xl font-black text-slate-900 mb-3">The worker&apos;s digital identity</h3>
+                <p className="text-slate-500 text-sm leading-relaxed mb-6">
                   Every verified worker gets a Trust Passport — a scannable digital credential containing their full employment history, trust score, endorsements, and incident record.
                 </p>
                 <div className="space-y-4">
                   {[
-                    ['QR Code Verification', 'Gatekeepers scan on entry — instantly confirmed in &lt;1 second'],
-                    ['Tamper-Proof Record', 'Blockchain-anchored. No one can fake or edit deployment history'],
+                    ['QR Code Verification', 'Gatekeepers scan on entry — instantly confirmed in under a second'],
+                    ['Permanent Record', 'Every deployment, rating, and incident is stored and cannot be deleted — only resolved'],
                     ['Portable Across Jobs', 'Works across every institution on TrustGrid, not just one employer'],
                   ].map(([title, desc]) => (
                     <div key={String(title)} className="flex gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: '#4F46E5' }} />
+                      <div className="w-1.5 h-1.5 rounded-full mt-2 shrink-0 bg-indigo-500" />
                       <div>
-                        <div className="text-white text-sm font-semibold">{title}</div>
-                        <div className="text-white/40 text-xs mt-0.5" dangerouslySetInnerHTML={{ __html: String(desc) }} />
+                        <div className="text-slate-800 text-sm font-semibold">{title}</div>
+                        <div className="text-slate-500 text-xs mt-0.5" dangerouslySetInnerHTML={{ __html: String(desc) }} />
                       </div>
                     </div>
                   ))}
@@ -467,21 +468,21 @@ export default function Demo() {
 
               {/* Explanatory text */}
               <div className="flex-1 pt-4">
-                <h3 className="text-2xl font-black text-white mb-3">Mobile-first for field workers</h3>
-                <p className="text-white/50 text-sm leading-relaxed mb-6">
-                  Workers join their community with a 6-character code, scan in at gates via QR, and receive job notifications on WhatsApp — no app download required for basic features.
+                <h3 className="text-2xl font-black text-slate-900 mb-3">Mobile-first for field workers</h3>
+                <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                  Workers join their community with a code or QR scan, and receive job notifications on WhatsApp — no complex setup required.
                 </p>
                 <div className="space-y-4">
                   {[
                     ['Works on any phone', 'Optimised for low-end Android devices. No high-spec phone required.'],
                     ['WhatsApp integration', 'Job alerts, confirmations and check-ins all happen in WhatsApp.'],
-                    ['Offline QR scan', 'Gatekeepers can verify passes offline — syncs when connectivity returns.'],
+                    ['QR gate check-in', 'Gatekeepers scan Trust Passports on entry — instantly confirmed.'],
                   ].map(([title, desc]) => (
                     <div key={String(title)} className="flex gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: '#E11D48' }} />
+                      <div className="w-1.5 h-1.5 rounded-full mt-2 shrink-0 bg-indigo-500" />
                       <div>
-                        <div className="text-white text-sm font-semibold">{title}</div>
-                        <div className="text-white/40 text-xs mt-0.5">{desc}</div>
+                        <div className="text-slate-800 text-sm font-semibold">{title}</div>
+                        <div className="text-slate-500 text-xs mt-0.5">{desc}</div>
                       </div>
                     </div>
                   ))}
@@ -492,38 +493,38 @@ export default function Demo() {
 
         </div>
 
-        {/* Legacy scenario callout */}
-        <div className="mt-16 rounded-3xl overflow-hidden border border-indigo-500/20" style={{ background: 'linear-gradient(135deg,rgba(79,70,229,0.08),rgba(13,148,136,0.08))' }}>
+        {/* Scenario callout */}
+        <div className="mt-16 rounded-3xl overflow-hidden border border-indigo-100 bg-gradient-to-br from-indigo-50 to-teal-50">
           <div className="p-8 md:p-10 grid md:grid-cols-2 gap-10 items-center">
             <div>
-              <div className="text-xs text-indigo-400 font-bold uppercase tracking-widest mb-3">Live Scenario</div>
-              <h3 className="text-2xl font-black text-white mb-3 leading-tight">
+              <div className="text-xs text-indigo-600 font-bold uppercase tracking-widest mb-3">Live Scenario</div>
+              <h3 className="text-2xl font-black text-slate-900 mb-3 leading-tight">
                 RCCG Convention needs 50 electricians. Now.
               </h3>
-              <p className="text-white/55 text-sm leading-relaxed mb-5">
+              <p className="text-slate-500 text-sm leading-relaxed mb-5">
                 The operations team creates a service request, sets minimum trust score to 65, and sees 33 verified electricians ranked by trust score — with full deployment history, endorsements, and incident records on every profile.
               </p>
               <a
                 href="https://app.trustgrid.ng/login"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white text-sm hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white text-sm hover:opacity-90 transition-opacity shadow-lg shadow-indigo-100"
                 style={{ background: 'linear-gradient(135deg,#4F46E5,#0D9488)' }}
               >
                 See It Live →
               </a>
             </div>
             <div className="space-y-2">
-              <div className="text-xs text-white/30 font-medium mb-3">What happens in 2 minutes</div>
+              <div className="text-xs text-slate-400 font-medium mb-3">What happens in 2 minutes</div>
               {[
                 ['Workers assigned', 'Under 2 minutes'],
                 ['Each worker notified', 'Via WhatsApp + SMS'],
                 ['Post-event reviews', 'Auto-update trust scores'],
                 ['Permanent record', 'Ready for next convention'],
               ].map(([action, result]) => (
-                <div key={String(action)} className="flex items-center justify-between py-2.5 border-b border-white/5 last:border-0">
-                  <span className="text-white/55 text-sm">{action}</span>
-                  <span className="text-emerald-400 text-sm font-semibold">{result}</span>
+                <div key={String(action)} className="flex items-center justify-between py-2.5 border-b border-indigo-100 last:border-0">
+                  <span className="text-slate-600 text-sm">{action}</span>
+                  <span className="text-emerald-600 text-sm font-semibold">{result}</span>
                 </div>
               ))}
             </div>

@@ -1429,3 +1429,21 @@ model OpportunityApplication {
   @@unique([opportunityId, applicantId])
   @@map("opportunity_applications")
 }
+
+model DemoRequest {
+  id              String    @id @default(cuid())
+  institutionName String
+  institutionType String?
+  contactName     String
+  contactRole     String?
+  contactPhone    String
+  contactEmail    String?
+  message         String?
+  status          String    @default("NEW")
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("demo_requests")
+}
+

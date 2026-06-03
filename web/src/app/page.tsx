@@ -14,7 +14,7 @@ import Footer from '@/components/sections/Footer'
 
 export default function Home() {
   return (
-    <main className="min-h-screen" style={{background:'#0A0A0F',color:'#F8FAFC'}}>
+    <main className="min-h-screen bg-white text-slate-900">
       <Navbar />
       <Hero />
       <StatsBar />

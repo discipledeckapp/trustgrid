@@ -5,12 +5,13 @@ import { cn } from '@/lib/utils'
 import { clearAdminAuth } from '@/lib/api'
 import {
   LayoutDashboard, Building2, Users, Briefcase,
-  ClipboardList, Settings, Shield, LogOut, Bell, Tag,
+  ClipboardList, Settings, Shield, LogOut, Tag, Mail,
 } from 'lucide-react'
 
 const NAV = [
   { href: '/dashboard',      label: 'Overview',        icon: LayoutDashboard, badge: null },
-  { href: '/applications',   label: 'Applications',    icon: ClipboardList,   badge: 'new' },
+  { href: '/demo-requests',  label: 'Demo Requests',   icon: Mail,            badge: 'new' },
+  { href: '/applications',   label: 'Applications',    icon: ClipboardList,   badge: null },
   { href: '/catalog',        label: 'Service Catalog', icon: Tag,             badge: null },
   { href: '/institutions',   label: 'Institutions',    icon: Building2,       badge: null },
   { href: '/organisations',  label: 'Organisations',   icon: Briefcase,       badge: null },

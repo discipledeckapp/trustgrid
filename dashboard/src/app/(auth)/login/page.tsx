@@ -53,8 +53,8 @@ function NetworkGMark({ size = 32 }: { size?: number }) {
 
 export default function LoginPage() {
   const router = useRouter()
-  const [identifier, setIdentifier] = useState('08001234567')
-  const [password, setPassword] = useState('Admin123!')
+  const [identifier, setIdentifier] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -220,12 +220,6 @@ export default function LoginPage() {
               <GoogleSignInButton label="Continue with Google" />
             </form>
 
-            {process.env.NODE_ENV === 'development' && (
-              <div className="mt-4 rounded-xl px-4 py-3 text-xs"
-                style={{ background: 'rgba(79,70,229,0.06)', color: '#4F46E5' }}>
-                <strong>Dev only:</strong> 08001234567 or emeka@redemptioncity.ng / Admin123!
-              </div>
-            )}
           </div>
 
           <p className="text-center text-white/40 text-sm mt-4">

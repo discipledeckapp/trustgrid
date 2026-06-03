@@ -51,15 +51,15 @@ const CUSTOMERS = [
 
 export default function WhoWeServe() {
   return (
-    <section id="who-we-serve" className="py-24 px-6 mesh-bg">
+    <section id="who-we-serve" className="py-24 px-6 bg-white">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14">
-          <span className="text-teal-400 text-sm font-semibold uppercase tracking-widest">Who We Serve</span>
-          <h2 className="text-4xl md:text-5xl font-black text-white mt-3 mb-4">
+          <span className="text-teal-600 text-sm font-semibold uppercase tracking-widest">Who We Serve</span>
+          <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-3 mb-4">
             Built for institutions.<br />
             <span className="text-gradient">Trusted by communities.</span>
           </h2>
-          <p className="text-white/40 max-w-xl mx-auto">
+          <p className="text-slate-500 max-w-xl mx-auto">
             Residents are users. Institutions are customers. Workers build their reputation. Everyone benefits from permanent trust infrastructure.
           </p>
         </div>
@@ -70,22 +70,21 @@ export default function WhoWeServe() {
               <div className="flex items-start gap-3 mb-4">
                 <span className="text-2xl mt-0.5">{icon}</span>
                 <div>
-                  <div className="font-bold text-white text-sm">{title}</div>
+                  <div className="font-bold text-slate-900 text-sm">{title}</div>
                 </div>
               </div>
 
-              {/* Person quote */}
-              <div className="flex items-start gap-3 mb-4 bg-white/3 rounded-xl p-3">
-                <img src={photo} alt={role} className="w-10 h-10 rounded-full object-cover shrink-0 ring-1 ring-white/10" />
+              <div className="flex items-start gap-3 mb-4 bg-slate-50 rounded-xl p-3">
+                <img src={photo} alt={role} className="w-10 h-10 rounded-full object-cover shrink-0 ring-1 ring-slate-200" />
                 <div>
-                  <p className="text-white/60 text-xs leading-relaxed italic">"{quote}"</p>
-                  <p className="text-white/30 text-[10px] mt-1.5">— {role}</p>
+                  <p className="text-slate-600 text-xs leading-relaxed italic">&ldquo;{quote}&rdquo;</p>
+                  <p className="text-slate-400 text-[10px] mt-1.5">— {role}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-2">
-                <span className="text-red-400/60 text-xs mt-0.5">✗</span>
-                <span className="text-white/30 text-xs">{pain}</span>
+                <span className="text-red-400 text-xs mt-0.5">✗</span>
+                <span className="text-slate-400 text-xs">{pain}</span>
               </div>
             </div>
           ))}

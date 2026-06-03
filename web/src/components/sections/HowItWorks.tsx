@@ -55,7 +55,7 @@ const STEPS = [
   },
   {
     n: '05',
-    title: 'QR scan verification',
+    title: 'Institutional memory builds',
     desc: 'Every assignment, incident, and review is permanently recorded. When your manager changes, the institutional memory stays. The community gets smarter with every interaction.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
@@ -72,76 +72,68 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-24 px-6" style={{ background: '#0F0F1A' }}>
+    <section id="how-it-works" className="py-24 px-6 bg-white">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
-          <span className="text-indigo-400 text-sm font-semibold uppercase tracking-widest">How It Works</span>
-          <h2 className="text-4xl md:text-5xl font-black text-white mt-3 mb-4">
+          <span className="text-indigo-600 text-sm font-semibold uppercase tracking-widest">How It Works</span>
+          <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-3 mb-4">
             Up and running in a day.<br />
             <span className="text-gradient">Permanent value from day one.</span>
           </h2>
-          <p className="text-white/40 max-w-lg mx-auto text-sm leading-relaxed">
+          <p className="text-slate-500 max-w-lg mx-auto text-sm leading-relaxed">
             Five steps from signup to a fully operational community workforce platform.
           </p>
         </div>
 
-        {/* Visual flow — horizontal on desktop, vertical on mobile */}
         <div className="hidden md:flex items-start justify-between gap-0 mb-12 relative">
-          {/* Dashed connector line behind the circles */}
           <div
             className="absolute top-9 left-[10%] right-[10%] h-px"
             style={{
-              backgroundImage: 'repeating-linear-gradient(90deg,rgba(255,255,255,0.12) 0,rgba(255,255,255,0.12) 8px,transparent 8px,transparent 16px)',
+              backgroundImage: 'repeating-linear-gradient(90deg,#CBD5E1 0,#CBD5E1 8px,transparent 8px,transparent 16px)',
             }}
           />
-          {STEPS.map(({ n, title, icon, color, gradStart, gradEnd }) => (
+          {STEPS.map(({ n, title, icon, gradStart, gradEnd, color }) => (
             <div key={n} className="flex flex-col items-center gap-3 z-10 w-36">
-              {/* Gradient circle */}
               <div
                 className="w-16 h-16 rounded-2xl flex items-center justify-center relative"
                 style={{
                   background: `linear-gradient(135deg,${gradStart},${gradEnd})`,
-                  boxShadow: `0 0 24px ${gradStart}50`,
+                  boxShadow: `0 4px 16px ${gradStart}40`,
                 }}
               >
                 <div style={{ color: '#fff' }}>{icon}</div>
-                {/* Step number badge */}
                 <div
-                  className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black text-white border-2 border-[#0F0F1A]"
+                  className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black text-white border-2 border-white"
                   style={{ background: color }}
                 >
                   {parseInt(n)}
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-white text-xs font-bold leading-snug">{title}</div>
+                <div className="text-slate-700 text-xs font-bold leading-snug">{title}</div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Step detail cards */}
         <div className="space-y-4">
           {STEPS.map(({ n, title, desc, icon, color, gradStart, gradEnd }, i) => (
             <div key={n} className="glass glass-hover rounded-2xl p-5 flex items-start gap-5 transition-all">
-              {/* Compact icon */}
               <div
                 className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: `linear-gradient(135deg,${gradStart},${gradEnd})` }}
               >
                 <div style={{ color: '#fff', transform: 'scale(0.8)' }}>{icon}</div>
               </div>
-              {/* Text */}
               <div className="flex-1">
                 <div className="flex items-baseline gap-2 mb-1">
                   <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color }}>{n}</span>
-                  <h3 className="font-bold text-white text-base">{title}</h3>
+                  <h3 className="font-bold text-slate-900 text-base">{title}</h3>
                 </div>
-                <p className="text-white/50 text-sm leading-relaxed">{desc}</p>
+                <p className="text-slate-500 text-sm leading-relaxed">{desc}</p>
               </div>
-              {/* Connector arrow — not on last item */}
               {i < STEPS.length - 1 && (
-                <div className="hidden md:flex shrink-0 self-center text-white/10 ml-2">
+                <div className="hidden md:flex shrink-0 self-center text-slate-300 ml-2">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7"/>
                   </svg>

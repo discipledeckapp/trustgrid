@@ -9,45 +9,41 @@ const COMMUNITIES = [
 
 export default function TrustedBy() {
   return (
-    <section className="py-20 px-6" style={{ background: '#080810' }}>
+    <section className="py-20 px-6 bg-slate-50">
       <div className="max-w-5xl mx-auto">
-        {/* Heading */}
         <div className="text-center mb-12">
-          <span className="text-indigo-400 text-sm font-semibold uppercase tracking-widest">
+          <span className="text-indigo-600 text-sm font-semibold uppercase tracking-widest">
             Community First
           </span>
-          <h2 className="text-3xl md:text-4xl font-black text-white mt-3">
+          <h2 className="text-3xl md:text-4xl font-black text-slate-900 mt-3">
             Built for communities across Nigeria
           </h2>
-          <p className="text-white/40 mt-3 text-sm max-w-xl mx-auto leading-relaxed">
+          <p className="text-slate-500 mt-3 text-sm max-w-xl mx-auto leading-relaxed">
             From mega-churches to gated estates — any community that manages people and trust can use TrustGrid.
           </p>
         </div>
 
-        {/* Community type cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
           {COMMUNITIES.map(({ icon, label, sample }) => (
             <div
               key={label}
-              className="flex flex-col items-center text-center rounded-2xl border border-white/8 px-3 py-5 gap-2 hover:border-indigo-500/40 hover:bg-indigo-500/5 transition-all cursor-default group"
-              style={{ background: 'rgba(255,255,255,0.02)' }}
+              className="flex flex-col items-center text-center rounded-2xl border border-slate-200 bg-white px-3 py-5 gap-2 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all cursor-default group shadow-sm"
             >
               <span className="text-2xl">{icon}</span>
-              <span className="text-white/80 text-[11px] font-semibold leading-tight">
+              <span className="text-slate-700 text-[11px] font-semibold leading-tight">
                 {label}
               </span>
-              <span className="text-white/25 text-[10px] group-hover:text-white/40 transition-colors">
+              <span className="text-slate-400 text-[10px] group-hover:text-indigo-500 transition-colors">
                 {sample}
               </span>
             </div>
           ))}
         </div>
 
-        {/* Subtle divider line */}
         <div className="mt-12 flex items-center gap-4 justify-center">
-          <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.08))' }} />
-          <span className="text-white/20 text-xs font-medium uppercase tracking-widest">more communities joining weekly</span>
-          <div className="h-px flex-1 max-w-[120px]" style={{ background: 'linear-gradient(to left, transparent, rgba(255,255,255,0.08))' }} />
+          <div className="h-px flex-1 max-w-[120px] bg-gradient-to-r from-transparent to-slate-300" />
+          <span className="text-slate-400 text-xs font-medium uppercase tracking-widest">more communities joining weekly</span>
+          <div className="h-px flex-1 max-w-[120px] bg-gradient-to-l from-transparent to-slate-300" />
         </div>
       </div>
     </section>
