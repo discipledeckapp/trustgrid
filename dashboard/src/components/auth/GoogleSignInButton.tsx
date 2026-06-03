@@ -1,4 +1,5 @@
 'use client'
+import { Component, type ReactNode } from 'react'
 import { useGoogleLogin } from '@react-oauth/google'
 import { useState } from 'react'
 import { api, saveAuth } from '@/lib/api'
@@ -9,9 +10,27 @@ interface Props {
   onNewUser?: (profile: { email: string; firstName: string; lastName: string; picture?: string }) => void
 }
 
-const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ''
+/** Class error boundary — catches useGoogleLogin throwing outside GoogleOAuthProvider */
+class GoogleButtonBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  render() {
+    if (this.state.failed) return <DisabledButton label="Google sign-in unavailable" />
+    return this.props.children
+  }
+}
 
-export function GoogleSignInButton({ label = 'Continue with Google', onNewUser }: Props) {
+function DisabledButton({ label }: { label: string }) {
+  return (
+    <button type="button" disabled
+      className="w-full flex items-center justify-center gap-3 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-gray-400 bg-gray-50 cursor-not-allowed">
+      <GoogleLogo />
+      {label}
+    </button>
+  )
+}
+
+function GoogleSignInInner({ label, onNewUser }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -54,16 +73,6 @@ export function GoogleSignInButton({ label = 'Continue with Google', onNewUser }
     onError: () => setError('Google sign-in was cancelled or failed.'),
   })
 
-  if (!CLIENT_ID) {
-    return (
-      <button type="button" disabled
-        className="w-full flex items-center justify-center gap-3 border border-gray-200 rounded-xl py-3 text-sm font-semibold text-gray-400 bg-gray-50 cursor-not-allowed">
-        <GoogleLogo />
-        Google sign-in not configured
-      </button>
-    )
-  }
-
   return (
     <div>
       <button type="button" onClick={() => login()} disabled={loading}
@@ -78,6 +87,18 @@ export function GoogleSignInButton({ label = 'Continue with Google', onNewUser }
       </button>
       {error && <p className="text-red-500 text-xs mt-1.5 text-center">{error}</p>}
     </div>
+  )
+}
+
+export function GoogleSignInButton({ label = 'Continue with Google', onNewUser }: Props) {
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+
+  if (!clientId) return <DisabledButton label="Google sign-in not configured" />
+
+  return (
+    <GoogleButtonBoundary>
+      <GoogleSignInInner label={label} onNewUser={onNewUser} />
+    </GoogleButtonBoundary>
   )
 }
 
