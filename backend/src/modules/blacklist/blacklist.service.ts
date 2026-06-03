@@ -55,12 +55,12 @@ export class BlacklistService {
             { phone: `+234${phone.slice(-10)}` },
           ],
         },
-        include: { workerProfile: true },
+        include: { workerProfiles: true },
       })
     } else if (isEmail) {
       user = await this.prisma.userAccount.findFirst({
         where: { institutionId, email: identifier.toLowerCase().trim() },
-        include: { workerProfile: true },
+        include: { workerProfiles: true },
       })
     } else {
       // Treat as workerId
@@ -80,8 +80,8 @@ export class BlacklistService {
       }
     }
 
-    if (!user?.workerProfile) return null
-    const w = user.workerProfile
+    if (!user?.workerProfiles?.[0]) return null
+    const w = user.workerProfiles[0]
     return {
       workerId: w.id,
       name: `${user.firstName} ${user.lastName}`,
@@ -276,7 +276,7 @@ export class BlacklistService {
         action: 'ORGANISATION_BLACKLISTED',
         entityType: 'Organisation',
         entityId: dto.organisationId,
-        changes: {
+        newState: {
           category: dto.category,
           reason: dto.reason,
           evidence: dto.evidence ?? null,
@@ -315,7 +315,7 @@ export class BlacklistService {
         action: 'ORGANISATION_REINSTATED',
         entityType: 'Organisation',
         entityId: organisationId,
-        changes: { reason, orgName: org.name },
+        newState: { reason, orgName: org.name },
       },
     })
 
@@ -391,7 +391,6 @@ export class BlacklistService {
         },
         include: {
           worker: { include: { user: { select: { firstName: true, lastName: true } } } },
-          reportedBy: { select: { firstName: true, lastName: true } },
         },
         orderBy: { incidentDate: 'desc' },
         take: limit,
@@ -415,7 +414,7 @@ export class BlacklistService {
       subjectName: i.worker ? `${i.worker.user.firstName} ${i.worker.user.lastName}` : 'Unknown',
       category: i.title.replace('Blacklisted: ', ''),
       reason: i.description?.split('\n\nEvidence:')[0] ?? '',
-      performedBy: i.reportedBy ? `${i.reportedBy.firstName} ${i.reportedBy.lastName}` : 'System',
+      performedBy: 'Admin',
       date: i.incidentDate,
     }))
 
@@ -423,9 +422,9 @@ export class BlacklistService {
       id: l.id,
       type: 'ORGANISATION',
       action: l.action === 'ORGANISATION_BLACKLISTED' ? 'BLACKLISTED' : 'REINSTATED',
-      subjectName: (l.changes as any)?.orgName ?? 'Unknown',
-      category: (l.changes as any)?.category ?? '—',
-      reason: (l.changes as any)?.reason ?? '',
+      subjectName: (l.newState as any)?.orgName ?? 'Unknown',
+      category: (l.newState as any)?.category ?? '—',
+      reason: (l.newState as any)?.reason ?? '',
       performedBy: l.user ? `${l.user.firstName} ${l.user.lastName}` : 'System',
       date: l.createdAt,
     }))
