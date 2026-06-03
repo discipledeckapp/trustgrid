@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard'
 import { Roles } from '../../common/decorators/roles.decorator'
 import { RolesGuard } from '../../common/guards/roles.guard'
 import { AdminService } from './admin.service'
+import { BlacklistService } from '../blacklist/blacklist.service'
 
 @ApiTags('Platform Admin')
 @ApiBearerAuth()
@@ -11,7 +12,10 @@ import { AdminService } from './admin.service'
 @Roles('PLATFORM_ADMIN')
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly blacklistService: BlacklistService,
+  ) {}
 
   @Get('stats')
   @ApiOperation({ summary: 'Get platform-wide admin dashboard statistics' })
@@ -55,5 +59,11 @@ export class AdminController {
   @ApiOperation({ summary: 'Revoke a Trust Passport' })
   revokePassport(@Param('id') id: string) {
     return this.adminService.revokePassport(id)
+  }
+
+  @Get('blacklists')
+  @ApiOperation({ summary: 'Global blacklist report — all suspended workers across all institutions' })
+  getGlobalBlacklist(@Query('page') page: string, @Query('limit') limit: string) {
+    return this.blacklistService.getGlobalBlacklist(Number(page) || 1, Number(limit) || 50)
   }
 }

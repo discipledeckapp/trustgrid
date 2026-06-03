@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { clearAdminAuth } from '@/lib/api'
 import {
   LayoutDashboard, Building2, Users, Briefcase,
-  ClipboardList, Settings, Shield, LogOut, Tag, Mail,
+  ClipboardList, Settings, Shield, LogOut, Tag, Mail, ShieldOff,
 } from 'lucide-react'
 
 const NAV = [
@@ -17,6 +17,7 @@ const NAV = [
   { href: '/organisations',  label: 'Organisations',   icon: Briefcase,       badge: null },
   { href: '/workers',        label: 'Workers',         icon: Users,           badge: null },
   { href: '/passports',      label: 'Trust Passports', icon: Shield,          badge: null },
+  { href: '/blacklists',     label: 'Blacklist Report',icon: ShieldOff,       badge: null },
 ]
 
 export function AdminSidebar() {
